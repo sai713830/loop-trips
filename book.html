@@ -17,7 +17,7 @@
     <div class="wrap">
       <p class="eyebrow">Booking</p>
       <h1>Book a trip.</h1>
-      <p>Three steps: pick the trip, add guest details, confirm. This is a demo — you get a Loop reference, no card is charged.</p>
+      <p>Three steps: pick the trip, add guest details, confirm — or skip the form and WhatsApp the desk. This is a demo — you get a Loop reference, no card is charged.</p>
     </div>
   </div>
 
@@ -91,6 +91,7 @@
           <div class="btn-row" style="margin-top:36px">
             <button class="btn btn-dark" id="back-btn" type="button" hidden>Back</button>
             <button class="btn btn-fill" id="next-btn" type="button">Continue</button>
+            <a class="btn btn-ghost" id="book-wa" href="https://wa.me/919951139299" target="_blank" rel="noopener">WhatsApp instead</a>
           </div>
         </div>
 
@@ -101,6 +102,7 @@
           <div id="sum-body"></div>
           <div class="total" id="sum-total"></div>
           <p style="opacity:.5;margin-top:8px;font-size:.78rem">Estimated total · demo</p>
+          <a class="btn btn-dark wa-btn" id="sum-wa" href="https://wa.me/919951139299" target="_blank" rel="noopener" style="margin-top:18px;width:100%;justify-content:center">Book on WhatsApp</a>
         </aside>
       </div>
 
@@ -111,6 +113,7 @@
         <p class="ref" id="ref-code"></p>
         <div class="btn-row" style="justify-content:center">
           <a class="btn btn-fill" href="bookings.html">View reservations</a>
+          <a class="btn btn-dark" id="confirm-wa" href="https://wa.me/919951139299" target="_blank" rel="noopener">WhatsApp the desk</a>
           <a class="btn btn-dark" href="journeys.html">Return to the list</a>
         </div>
       </div>

@@ -28,6 +28,12 @@
 
   const brand = () => LOOP.brand || {};
 
+  function waBookingLink(message) {
+    const base = brand().whatsappLink || "https://wa.me/919951139299";
+    if (!message) return base;
+    return `${base}?text=${encodeURIComponent(message)}`;
+  }
+
   const kolamSvg = `<svg viewBox="0 0 80 80" fill="none" aria-hidden="true">
     <circle cx="40" cy="40" r="2.4" fill="currentColor"/>
     <circle cx="40" cy="14" r="1.8" fill="currentColor"/>
@@ -61,7 +67,7 @@
         ${logoSvg}
         <span class="logo-text">
           <span class="logo-name">Loop Trips</span>
-          <span class="logo-mark">Spice Route Luxe</span>
+          <span class="logo-mark">${b.logoMark || b.tagline || "Desh pehle · Duniya tak"}</span>
         </span>
       </a>
       <nav class="nav" id="nav" aria-label="Primary">
@@ -77,9 +83,9 @@
             <button type="button" class="currency-btn${cur === "INR" ? " on" : ""}" data-currency="INR" aria-pressed="${cur === "INR"}">₹ INR</button>
             <button type="button" class="currency-btn${cur === "USD" ? " on" : ""}" data-currency="USD" aria-pressed="${cur === "USD"}">$ USD</button>
           </div>
-          <a class="nav-phone" href="tel:${b.phoneTel || "+918045672100"}">
-            <span class="nav-phone-label">Desk</span>
-            <span class="nav-phone-num">${b.phone || "+91 80 4567 2100"}</span>
+          <a class="nav-phone" href="${b.whatsappLink || "https://wa.me/919951139299"}" target="_blank" rel="noopener">
+            <span class="nav-phone-label">WhatsApp</span>
+            <span class="nav-phone-num">${b.whatsapp || b.phone || "+91 99511 39299"}</span>
           </a>
           <a class="book-link" href="book.html">Plan a trip</a>
         </div>
@@ -117,9 +123,9 @@
         <div class="foot-top">
           <div class="foot-brand">
             <a class="foot-logo" href="index.html">${logoSvg}<span>Loop Trips</span></a>
-            <p class="foot-tagline">India from ₹50,000. The world from ₹1,00,000. A small desk in ${b.city || "Bengaluru"}.</p>
-            <p class="foot-trust">${trust.label || "4.8★ — 200+ trips booked"}</p>
-            <p class="foot-hours">Open ${b.hours || "10:00–18:00 IST"} · License ${b.license || ""} · ${b.iata || ""}</p>
+            <p class="foot-tagline">${b.tagline || "Desh pehle. Phir jahaan dil jaaye."} India from ₹50,000 — the world from ₹1,00,000. Desk in ${b.city || "Hyderabad"}.</p>
+            ${trust.label ? `<p class="foot-trust">${trust.label}</p>` : ""}
+            <p class="foot-hours">Open ${b.hours || "10:00–18:00 IST"}${b.license ? ` · ${b.license}` : ""}${b.iata ? ` · ${b.iata}` : ""} · WhatsApp ${b.whatsapp || b.phone || "+91 99511 39299"}</p>
           </div>
           <div class="foot-col">
             <p class="eyebrow">Explore</p>
@@ -137,8 +143,8 @@
           <div class="foot-col">
             <p class="eyebrow">Desk</p>
             <a href="mailto:${b.email || "concierge@looptrips.com"}">${b.email || "concierge@looptrips.com"}</a>
-            <a href="tel:${b.phoneTel || "+918045672100"}">${b.phone || "+91 80 4567 2100"}</a>
-            <a href="${b.whatsappLink || "#"}" target="_blank" rel="noopener">WhatsApp chat</a>
+            <a href="${b.whatsappLink || "https://wa.me/919951139299"}" target="_blank" rel="noopener">WhatsApp ${b.whatsapp || b.phone || "+91 99511 39299"}</a>
+            <a href="tel:${b.phoneTel || "+919951139299"}">Call ${b.phone || "+91 99511 39299"}</a>
             <a href="about.html">About</a>
             <a href="contact.html">Contact</a>
             <a href="concierge.html">Concierge</a>
@@ -152,8 +158,8 @@
           </div>
         </div>
         <div class="foot-bottom">
-          <span>Loop Trips · Spice Route Luxe · ${b.addressFull || b.city || "Bengaluru"}</span>
-          <span>${b.license || ""} · ${b.iata || ""}</span>
+          <span>Loop Trips · ${b.addressFull || b.city || "Hyderabad"}</span>
+          <span>WhatsApp ${b.whatsapp || b.phone || "+91 99511 39299"}${b.instagramHandle ? ` · ${b.instagramHandle}` : ""}</span>
         </div>
       </div>
     </footer>`;
@@ -324,12 +330,13 @@
     if (proof) {
       const t = LOOP.trust || {};
       const b = brand();
-      proof.innerHTML = `
-        <span>${t.label || b.ratingLabel || "4.8★ — 200+ trips booked"}</span>
-        <span>${b.years || 8}+ years planning</span>
-        <span>${t.licenseNote || "Licensed travel agency"}</span>
-        <span>${t.iataNote || "IATA accredited"}</span>
-      `;
+      const bits = [
+        t.label || "Private trips · India first",
+        t.licenseNote || (b.city ? `${b.city} desk` : ""),
+        b.whatsapp || b.phone ? `WhatsApp ${b.whatsapp || b.phone}` : "",
+        b.instagramHandle || "",
+      ].filter(Boolean);
+      proof.innerHTML = bits.map((s) => `<span>${s}</span>`).join("");
     }
 
     renderReviews("#reviews-grid");
@@ -377,32 +384,46 @@
     const trust = LOOP.trust || {};
     const stats = $("#about-stats");
     if (stats) {
-      stats.innerHTML = `
-        <div class="about-stat"><strong>${trust.rating || "4.8"}★</strong><span>Guest rating</span></div>
-        <div class="about-stat"><strong>${trust.tripsBooked || "200+"}</strong><span>Trips booked</span></div>
-        <div class="about-stat"><strong>${b.years || 8}+</strong><span>Years at the desk</span></div>
-        <div class="about-stat"><strong>${b.iata || "IATA"}</strong><span>Agency registration</span></div>
-      `;
+      const cells = [];
+      if (trust.rating) cells.push(`<div class="about-stat"><strong>${trust.rating}★</strong><span>Guest rating</span></div>`);
+      if (trust.tripsBooked) cells.push(`<div class="about-stat"><strong>${trust.tripsBooked}</strong><span>Trips booked</span></div>`);
+      if (b.years) cells.push(`<div class="about-stat"><strong>${b.years}+</strong><span>Years at the desk</span></div>`);
+      cells.push(`<div class="about-stat"><strong>WhatsApp</strong><span>${b.whatsapp || b.phone || "+91 99511 39299"}</span></div>`);
+      cells.push(`<div class="about-stat"><strong>${b.city || "Hyderabad"}</strong><span>Desk</span></div>`);
+      if (b.instagramHandle) cells.push(`<div class="about-stat"><strong>${b.instagramHandle}</strong><span>Instagram</span></div>`);
+      stats.innerHTML = cells.join("");
     }
     const license = $("#about-license");
     if (license) {
-      license.innerHTML = `<p><strong>Travel agency license</strong> · ${b.license || "—"}</p>
-        <p><strong>IATA</strong> · ${b.iata || "—"}</p>
-        <p>Registered desk in ${b.city || "Bengaluru"} — ${b.addressFull || ""}</p>`;
+      const lines = [
+        `<p><strong>Desk</strong> · ${b.addressFull || b.city || "Hyderabad"}</p>`,
+        `<p><strong>WhatsApp</strong> · <a href="${b.whatsappLink}" target="_blank" rel="noopener">${b.whatsapp || b.phone}</a></p>`,
+        `<p><strong>Hours</strong> · ${b.hours || "10:00–18:00 IST"}</p>`,
+      ];
+      if (b.license) lines.push(`<p><strong>License</strong> · ${b.license}</p>`);
+      if (b.iata) lines.push(`<p><strong>IATA</strong> · ${b.iata}</p>`);
+      license.innerHTML = lines.join("");
     }
     const team = $("#team-grid");
     if (team) {
-      team.innerHTML = (LOOP.team || [])
-        .map(
-          (m) => `<article class="team-card">
+      const members = LOOP.team || [];
+      if (!members.length) {
+        const section = team.closest("section");
+        if (section) section.hidden = true;
+        team.innerHTML = "";
+      } else {
+        team.innerHTML = members
+          .map(
+            (m) => `<article class="team-card">
             <img src="${m.image}" alt="${m.name}" loading="lazy">
             <h3>${m.name}</h3>
             <p class="team-role">${m.role}</p>
-            <p class="team-years">${m.years}</p>
-            <p class="team-bio">${m.bio}</p>
+            <p class="team-years">${m.years || ""}</p>
+            <p class="team-bio">${m.bio || ""}</p>
           </article>`
-        )
-        .join("");
+          )
+          .join("");
+      }
     }
     renderReviews("#about-reviews");
   }
@@ -803,6 +824,10 @@
     $("#book-now").href = `book.html?id=${j.id}`;
     const ask = document.getElementById("ask-trip");
     if (ask) ask.href = `concierge.html?about=${j.id}&q=${encodeURIComponent("Customise " + j.title + " to my budget")}`;
+    const tripWa = $("#book-wa-trip");
+    if (tripWa) {
+      tripWa.href = waBookingLink(`Hi Loop Trips — I'd like to book ${j.title} (${fromPrice(j)}).`);
+    }
 
     const related = LOOP.journeys
       .filter((x) => x.collection === j.collection && x.id !== j.id)
@@ -818,6 +843,19 @@
     select.innerHTML = LOOP.journeys
       .map((j) => `<option value="${j.id}" ${pre && pre.id === j.id ? "selected" : ""}>${j.title} — ${j.country} · ${fromPrice(j)}</option>`)
       .join("");
+
+    function syncWhatsAppLinks() {
+      const j = getJourney(select.value);
+      const msg = j
+        ? `Hi Loop Trips — I'd like to book ${j.title} (${fromPrice(j)}).`
+        : "Hi Loop Trips — I'd like to book a trip.";
+      const href = waBookingLink(msg);
+      ["book-wa", "sum-wa", "confirm-wa"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.href = href;
+      });
+    }
+    syncWhatsAppLinks();
 
     const suiteBox = $("#suites");
     suiteBox.innerHTML = LOOP.suites
@@ -947,6 +985,7 @@
     });
     select.addEventListener("change", () => {
       syncGuests();
+      syncWhatsAppLinks();
       updateSummary();
     });
 
@@ -1042,6 +1081,12 @@
       $("#confirm").hidden = false;
       $("#ref-code").textContent = ref;
       $("#confirm-copy").textContent = `${s.j.title} · ${s.guests} guest${s.guests > 1 ? "s" : ""} · departing ${s.start} · ${money(s.total)}`;
+      const confirmWa = $("#confirm-wa");
+      if (confirmWa) {
+        confirmWa.href = waBookingLink(
+          `Hi Loop Trips — I held ${s.j.title} (ref ${ref}). Guests: ${s.guests}, departing ${s.start}.`
+        );
+      }
     }
 
     syncGuests();
@@ -1087,20 +1132,26 @@
     if (desk) {
       desk.innerHTML = `
         <p class="eyebrow">Desk</p>
-        <h2>${b.city || "Bengaluru"}</h2>
+        <h2>${b.city || "Hyderabad"}</h2>
         <p class="contact-address">${b.addressFull || ""}</p>
         <ul class="contact-list">
+          <li><span>WhatsApp</span><a href="${b.whatsappLink}" target="_blank" rel="noopener">${b.whatsapp || b.phone}</a></li>
           <li><span>Phone</span><a href="tel:${b.phoneTel}">${b.phone}</a></li>
-          <li><span>WhatsApp</span><a href="${b.whatsappLink}" target="_blank" rel="noopener">Chat on WhatsApp</a></li>
           <li><span>Email</span><a href="mailto:${b.email}">${b.email}</a></li>
           <li><span>Hours</span><span>${b.hours}</span></li>
-          <li><span>License</span><span>${b.license}</span></li>
-          <li><span>IATA</span><span>${b.iata}</span></li>
+          ${b.instagramHandle ? `<li><span>Instagram</span><a href="${b.instagram}" target="_blank" rel="noopener">${b.instagramHandle}</a></li>` : ""}
+          ${b.license ? `<li><span>License</span><span>${b.license}</span></li>` : ""}
+          ${b.iata ? `<li><span>IATA</span><span>${b.iata}</span></li>` : ""}
         </ul>
         <a class="btn btn-fill wa-btn" href="${b.whatsappLink}" target="_blank" rel="noopener">WhatsApp the desk</a>
-        <p class="contact-note">Prefer a hold online? Use <a href="book.html">Plan a trip</a>.</p>
+        <p class="contact-note">Book via the form, or WhatsApp us on ${b.whatsapp || b.phone}. Prefer a hold online? Use <a href="book.html">Plan a trip</a>.</p>
       `;
     }
+    const waHref = b.whatsappLink || "https://wa.me/919951139299";
+    ["contact-wa", "contact-done-wa"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.href = waHref;
+    });
     const form = $("#contact-form");
     if (form) {
       form.addEventListener("submit", (e) => {

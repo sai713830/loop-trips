@@ -1,12 +1,68 @@
 /**
  * Loop Trips CMS bridge
  * Merges admin overrides from localStorage (loop_cms) over data.js seed.
+ * Profile contact (WhatsApp / Hyderabad / Instagram) is migrated onto old CMS stores.
  */
 (function () {
   const KEY = "loop_cms";
+  const PROFILE_VERSION = 3;
+
+  /** Canonical desk profile — wins over stale CMS brand contact fields on migrate. */
+  const PROFILE = {
+    phone: "+91 99511 39299",
+    phoneTel: "+919951139299",
+    whatsapp: "+91 99511 39299",
+    whatsappLink: "https://wa.me/919951139299",
+    city: "Hyderabad",
+    address: "Hitech City, Madhapur",
+    addressFull: "Hitech City, Madhapur, Hyderabad, Telangana 500081",
+    instagram: "https://instagram.com/LOOPTRIPS.IN",
+    instagramHandle: "@LOOPTRIPS.IN",
+    logoMark: "Desh pehle · Duniya tak",
+    tagline: "Desh pehle. Phir jahaan dil jaaye.",
+    hours: "10:00–18:00 IST",
+    license: "",
+    iata: "",
+    years: "",
+    tripsBooked: "",
+    rating: "",
+    ratingLabel: "",
+  };
 
   function clone(v) {
     return JSON.parse(JSON.stringify(v));
+  }
+
+  function digits(v) {
+    return String(v || "").replace(/\D/g, "");
+  }
+
+  function telFromPhone(phone) {
+    let d = digits(phone);
+    if (d.length === 10) d = "91" + d;
+    if (d.startsWith("0") && d.length === 11) d = "91" + d.slice(1);
+    return d ? "+" + d : PROFILE.phoneTel;
+  }
+
+  function waFromPhone(phone) {
+    return "https://wa.me/" + digits(telFromPhone(phone));
+  }
+
+  function syncContactDerived(brand) {
+    if (!brand) return brand;
+    const phone = brand.phone || brand.whatsapp || PROFILE.phone;
+    brand.phone = phone;
+    brand.whatsapp = brand.whatsapp || phone;
+    brand.phoneTel = telFromPhone(phone);
+    brand.whatsappLink = waFromPhone(phone);
+    return brand;
+  }
+
+  function isStalePhone(brand) {
+    const d = digits(brand && (brand.phone || brand.phoneTel || brand.whatsapp));
+    if (!d) return true;
+    if (d.includes("8045672100") || d === "918045672100" || d === "8045672100") return true;
+    return false;
   }
 
   function loadCms() {
@@ -52,10 +108,16 @@
   }
 
   function snapshotFromSeed() {
+    const brand = syncContactDerived({ ...clone(LOOP.brand || {}), ...PROFILE });
     return {
       version: 1,
+      profileVersion: PROFILE_VERSION,
       updatedAt: new Date().toISOString(),
-      brand: clone(LOOP.brand || {}),
+      brand,
+      trust: clone(LOOP.trust || {}),
+      team: clone(LOOP.team || []),
+      reviews: clone(LOOP.reviews || []),
+      gallery: clone(LOOP.gallery || []),
       collections: clone(LOOP.collections || []),
       journeys: clone(LOOP.journeys || []),
       home: defaultHome(),
@@ -65,12 +127,79 @@
     };
   }
 
+  function migrateCms(cms) {
+    if (!cms) return null;
+    let changed = false;
+    if (!cms.brand) {
+      cms.brand = { ...PROFILE };
+      changed = true;
+    }
+
+    const needsProfile =
+      (cms.profileVersion || 0) < PROFILE_VERSION ||
+      isStalePhone(cms.brand) ||
+      /bengaluru|bangalore|lavelle|karnataka/i.test(
+        `${cms.brand.city || ""} ${cms.brand.address || ""} ${cms.brand.addressFull || ""} ${cms.brand.license || ""} ${cms.brand.iata || ""}`
+      );
+
+    if (needsProfile) {
+      cms.brand = {
+        ...cms.brand,
+        ...PROFILE,
+        house: cms.brand.house || "Loop Trips",
+        email: cms.brand.email || "concierge@looptrips.com",
+        collection: cms.brand.collection || "Spice Route Luxe",
+      };
+      cms.brand = syncContactDerived(cms.brand);
+      cms.trust = clone(LOOP.trust || {});
+      if (Array.isArray(cms.team) && cms.team.some((m) => /Ananya|Vikram|Meera/.test(m.name || ""))) {
+        cms.team = [];
+      }
+      cms.profileVersion = PROFILE_VERSION;
+      changed = true;
+    } else {
+      const before = JSON.stringify(cms.brand);
+      cms.brand = syncContactDerived(cms.brand);
+      if (JSON.stringify(cms.brand) !== before) changed = true;
+    }
+
+    if (!cms.trust) {
+      cms.trust = clone(LOOP.trust || {});
+      changed = true;
+    }
+
+    if (!Array.isArray(cms.team)) {
+      cms.team = clone(LOOP.team || []);
+      changed = true;
+    }
+    if (!Array.isArray(cms.reviews)) {
+      cms.reviews = clone(LOOP.reviews || []);
+      changed = true;
+    }
+    if (!Array.isArray(cms.gallery)) {
+      cms.gallery = clone(LOOP.gallery || []);
+      changed = true;
+    }
+    if (!cms.home) {
+      cms.home = defaultHome();
+      changed = true;
+    }
+
+    if (changed) saveCms(cms);
+    return cms;
+  }
+
   function applyCms(cms) {
     if (!cms) {
       LOOP.home = LOOP.home || defaultHome();
+      syncContactDerived(LOOP.brand);
       return;
     }
-    if (cms.brand) Object.assign(LOOP.brand, cms.brand);
+    if (cms.brand) Object.assign(LOOP.brand, syncContactDerived({ ...cms.brand }));
+    if (cms.trust) LOOP.trust = cms.trust;
+    if (Array.isArray(cms.team)) LOOP.team = cms.team;
+    if (Array.isArray(cms.reviews)) LOOP.reviews = cms.reviews;
+    if (Array.isArray(cms.gallery)) LOOP.gallery = cms.gallery;
     if (Array.isArray(cms.collections) && cms.collections.length) {
       LOOP.collections = cms.collections;
     }
@@ -100,16 +229,21 @@
     }
   }
 
-  const cms = loadCms();
+  let cms = migrateCms(loadCms());
   applyCms(cms);
 
   LOOP.CMS = {
     KEY,
-    load: loadCms,
+    PROFILE,
+    PROFILE_VERSION,
+    load: () => migrateCms(loadCms()),
     save: saveCms,
     snapshotFromSeed,
     defaultHome,
     apply: applyCms,
+    syncContactDerived,
+    telFromPhone,
+    waFromPhone,
     hasOverrides: () => !!loadCms(),
   };
 })();

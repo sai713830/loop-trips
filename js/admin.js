@@ -71,8 +71,39 @@
       LOOP.CMS.save(cms);
     }
     if (!cms.home) cms.home = LOOP.CMS.defaultHome();
+    if (!cms.brand) cms.brand = { ...LOOP.CMS.PROFILE };
+    cms.brand = LOOP.CMS.syncContactDerived(cms.brand);
+    if (!cms.trust) cms.trust = JSON.parse(JSON.stringify(LOOP.trust || {}));
+    if (!Array.isArray(cms.team)) cms.team = [];
+    if (!Array.isArray(cms.reviews)) cms.reviews = JSON.parse(JSON.stringify(LOOP.reviews || []));
+    if (!Array.isArray(cms.gallery)) cms.gallery = JSON.parse(JSON.stringify(LOOP.gallery || []));
     state.cms = cms;
+    LOOP.CMS.apply(cms);
     return cms;
+  }
+
+  function normalizeBrandFromForm(form) {
+    const phone = form.phone.value.trim() || LOOP.CMS.PROFILE.phone;
+    const brand = {
+      ...state.cms.brand,
+      house: form.house.value.trim() || "Loop Trips",
+      collection: form.collection.value.trim(),
+      tagline: form.tagline.value.trim(),
+      logoMark: form.logoMark.value.trim(),
+      phone,
+      whatsapp: form.whatsapp.value.trim() || phone,
+      email: form.email.value.trim(),
+      city: form.city.value.trim(),
+      address: form.address.value.trim(),
+      addressFull: form.addressFull.value.trim(),
+      hours: form.hours.value.trim(),
+      instagram: form.instagram.value.trim(),
+      instagramHandle: form.instagramHandle.value.trim(),
+      license: form.license.value.trim(),
+      iata: form.iata.value.trim(),
+      years: form.years.value.trim(),
+    };
+    return LOOP.CMS.syncContactDerived(brand);
   }
 
   function persist() {
@@ -525,13 +556,17 @@
 
   function renderBrand() {
     const b = state.cms.brand || {};
+    const t = state.cms.trust || {};
     return `
       <div class="admin-top">
         <div>
           <h2>Brand & desk</h2>
-          <p>Site-wide phone, email, tagline.</p>
+          <p>WhatsApp number, address, Instagram, tagline — what the public site shows.</p>
         </div>
-        <button class="btn btn-accent" type="button" id="brand-save">Save brand</button>
+        <div class="toolbar">
+          <button class="btn" type="button" id="brand-profile">Apply profile defaults</button>
+          <button class="btn btn-accent" type="button" id="brand-save">Save brand</button>
+        </div>
       </div>
       <form class="card" id="brand-form">
         <div class="grid-form">
@@ -547,19 +582,82 @@
             <label>Tagline</label>
             <input name="tagline" value="${escapeAttr(b.tagline || "")}">
           </div>
+          <div class="field full">
+            <label>Logo line (under Loop Trips)</label>
+            <input name="logoMark" value="${escapeAttr(b.logoMark || "")}">
+          </div>
           <div class="field">
-            <label>Phone</label>
-            <input name="phone" value="${escapeAttr(b.phone || "")}">
+            <label>WhatsApp / desk number</label>
+            <input name="phone" value="${escapeAttr(b.phone || "")}" placeholder="+91 99511 39299">
+          </div>
+          <div class="field">
+            <label>WhatsApp display (optional)</label>
+            <input name="whatsapp" value="${escapeAttr(b.whatsapp || "")}" placeholder="Same as phone if blank">
           </div>
           <div class="field">
             <label>Email</label>
             <input name="email" value="${escapeAttr(b.email || "")}">
           </div>
           <div class="field">
+            <label>Hours</label>
+            <input name="hours" value="${escapeAttr(b.hours || "")}">
+          </div>
+          <div class="field">
             <label>City</label>
             <input name="city" value="${escapeAttr(b.city || "")}">
           </div>
+          <div class="field">
+            <label>Address (short)</label>
+            <input name="address" value="${escapeAttr(b.address || "")}">
+          </div>
+          <div class="field full">
+            <label>Full address (footer)</label>
+            <input name="addressFull" value="${escapeAttr(b.addressFull || "")}">
+          </div>
+          <div class="field">
+            <label>Instagram URL</label>
+            <input name="instagram" value="${escapeAttr(b.instagram || "")}">
+          </div>
+          <div class="field">
+            <label>Instagram handle</label>
+            <input name="instagramHandle" value="${escapeAttr(b.instagramHandle || "")}">
+          </div>
+          <div class="field">
+            <label>License (optional — leave blank if none)</label>
+            <input name="license" value="${escapeAttr(b.license || "")}">
+          </div>
+          <div class="field">
+            <label>IATA (optional — leave blank if none)</label>
+            <input name="iata" value="${escapeAttr(b.iata || "")}">
+          </div>
+          <div class="field">
+            <label>Years at desk (optional)</label>
+            <input name="years" value="${escapeAttr(b.years || "")}" placeholder="Leave blank to hide">
+          </div>
         </div>
+      </form>
+      <form class="card" id="trust-form">
+        <h3 style="margin-top:0;font-family:var(--serif);font-weight:500">Homepage proof lines</h3>
+        <p style="color:var(--admin-mute);font-size:.9rem">Only fill what is true. Blank fields stay hidden.</p>
+        <div class="grid-form">
+          <div class="field">
+            <label>Main proof line</label>
+            <input name="label" value="${escapeAttr(t.label || "")}" placeholder="Private trips · India first">
+          </div>
+          <div class="field">
+            <label>Second proof line</label>
+            <input name="licenseNote" value="${escapeAttr(t.licenseNote || "")}" placeholder="Hyderabad desk · Hitech City">
+          </div>
+          <div class="field">
+            <label>Guest rating (optional)</label>
+            <input name="rating" value="${escapeAttr(t.rating || "")}" placeholder="e.g. 4.8">
+          </div>
+          <div class="field">
+            <label>Trips booked (optional)</label>
+            <input name="tripsBooked" value="${escapeAttr(t.tripsBooked || "")}" placeholder="e.g. 200+">
+          </div>
+        </div>
+        <button class="btn btn-accent" type="button" id="trust-save" style="margin-top:12px">Save proof lines</button>
       </form>`;
   }
 
@@ -668,21 +766,23 @@
     return `
       <div class="admin-top">
         <div>
-          <h2>Going live</h2>
-          <p>How this admin moves you from demo to a real Loop Trips site.</p>
+          <h2>How to use this admin</h2>
+          <p>Test every change on the public site in this same browser.</p>
         </div>
       </div>
       <div class="card going-live">
         <ol>
-          <li>Edit packages, collections, and homepage picks here until the catalogue is right.</li>
-          <li><strong>Export JSON</strong> in Settings — keep <code>loop-cms-export.json</code> as your backup.</li>
-          <li>Host the static site (Netlify, Cloudflare Pages, or your domain). Bookmark <code>/admin.html</code> (not linked in public nav).</li>
-          <li>Important: localStorage is per browser. Visitors only see seed data until Phase 2 cloud sync — use Export as source of truth, or re-import after publish on the machine that manages content.</li>
-          <li>Phase 2: same JSON shape → Convex / API so every visitor gets live CMS content. Image uploads to a CDN come then too.</li>
+          <li><strong>Packages</strong> — Add package, fill title / price / cities / itinerary / images, Save. Use Delete to remove. Duplicate to clone.</li>
+          <li><strong>Collections</strong> — Edit Sanatan, Biker, Community, Solo, Surprise, Group copy and hero images.</li>
+          <li><strong>Brand</strong> — WhatsApp number, Hyderabad address, Instagram, tagline. Use “Apply profile defaults” if the old desk number reappears.</li>
+          <li><strong>Homepage</strong> — Put journey IDs (one per line) into India strip and World highlights.</li>
+          <li>Open <a href="index.html" target="_blank" rel="noopener">the public site</a> and hard-refresh. Content is stored in this browser’s localStorage.</li>
+          <li><strong>Settings → Export JSON</strong> before you clear browser data. Import to restore. Reset to seed restores the original catalogue.</li>
         </ol>
         <div class="toolbar" style="margin-top:20px">
           <button class="btn btn-accent" type="button" id="btn-export-live">Export JSON now</button>
           <a class="btn" href="index.html" target="_blank" rel="noopener">Preview homepage</a>
+          <a class="btn" href="journeys.html" target="_blank" rel="noopener">Preview all trips</a>
         </div>
       </div>`;
   }
@@ -727,8 +827,13 @@
       $$("[data-del]").forEach(
         (b) =>
           (b.onclick = () => {
-            if (!confirm(`Delete package “${b.dataset.del}”?`)) return;
-            state.cms.journeys = state.cms.journeys.filter((j) => j.id !== b.dataset.del);
+            const id = b.dataset.del;
+            if (!confirm(`Delete package “${id}”? This removes it from the public catalogue in this browser.`)) return;
+            state.cms.journeys = state.cms.journeys.filter((j) => j.id !== id);
+            if (state.cms.home) {
+              state.cms.home.indiaStrip = (state.cms.home.indiaStrip || []).filter((x) => x !== id);
+              state.cms.home.worldHighlights = (state.cms.home.worldHighlights || []).filter((x) => x !== id);
+            }
             persist();
             render();
           })
@@ -755,14 +860,31 @@
     if (state.view === "brand") {
       $("#brand-save").onclick = () => {
         const form = $("#brand-form");
-        state.cms.brand = {
+        state.cms.brand = normalizeBrandFromForm(form);
+        persist();
+      };
+      $("#brand-profile").onclick = () => {
+        state.cms.brand = LOOP.CMS.syncContactDerived({
           ...state.cms.brand,
-          house: form.house.value.trim(),
-          collection: form.collection.value.trim(),
-          tagline: form.tagline.value.trim(),
-          phone: form.phone.value.trim(),
-          email: form.email.value.trim(),
-          city: form.city.value.trim(),
+          ...LOOP.CMS.PROFILE,
+          house: state.cms.brand.house || "Loop Trips",
+          email: state.cms.brand.email || "concierge@looptrips.com",
+          collection: state.cms.brand.collection || "Spice Route Luxe",
+        });
+        state.cms.profileVersion = LOOP.CMS.PROFILE_VERSION;
+        persist();
+        render();
+        toast("Profile defaults applied — WhatsApp 9951139299");
+      };
+      $("#trust-save").onclick = () => {
+        const form = $("#trust-form");
+        state.cms.trust = {
+          ...(state.cms.trust || {}),
+          label: form.label.value.trim(),
+          licenseNote: form.licenseNote.value.trim(),
+          rating: form.rating.value.trim(),
+          tripsBooked: form.tripsBooked.value.trim(),
+          iataNote: "",
         };
         persist();
       };
