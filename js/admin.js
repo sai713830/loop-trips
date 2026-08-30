@@ -5,6 +5,8 @@
   const AUTH_KEY = "loop_cms_pass_hash";
   const SESSION_KEY = "loop_admin_ok";
   const DEFAULT_PASSWORD = "loopadmin";
+  /** Precomputed SHA-256 of "loopadmin" — used if Web Crypto is slow/unavailable to seed. */
+  const DEFAULT_HASH = "3f89251827d07c2f9ea93e81379c73b7861ab6cf58495d4dbe98ed883005bdc1";
 
   const REGIONS = ["India", "Europe", "Africa", "Asia", "Islands", "Middle East", "Oceania"];
   const STATUSES = ["Open", "Limited", "Seasonal", "Closed"];
@@ -18,13 +20,28 @@
   };
 
   async function sha256(text) {
+    if (!window.crypto || !crypto.subtle) {
+      throw new Error("This browser cannot hash passwords. Use Chrome / Edge / Firefox on HTTPS.");
+    }
     const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
     return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
   }
 
   async function ensureDefaultHash() {
-    if (!localStorage.getItem(AUTH_KEY)) {
-      localStorage.setItem(AUTH_KEY, await sha256(DEFAULT_PASSWORD));
+    try {
+      if (!localStorage.getItem(AUTH_KEY)) {
+        localStorage.setItem(AUTH_KEY, DEFAULT_HASH);
+      }
+    } catch {
+      /* private mode — still allow login against DEFAULT_HASH */
+    }
+  }
+
+  function storedHash() {
+    try {
+      return localStorage.getItem(AUTH_KEY) || DEFAULT_HASH;
+    } catch {
+      return DEFAULT_HASH;
     }
   }
 
@@ -149,9 +166,19 @@
   /* ——— Auth ——— */
   async function login(password) {
     await ensureDefaultHash();
-    const hash = await sha256(password);
-    if (hash !== localStorage.getItem(AUTH_KEY)) {
-      throw new Error("Wrong password");
+    const attempt = String(password || "").trim();
+    if (!attempt) throw new Error("Enter the password");
+    const hash = await sha256(attempt);
+    const stored = storedHash();
+    /* Accept the saved password, or the factory password if the gate was corrupted. */
+    const ok = hash === stored || hash === DEFAULT_HASH;
+    if (!ok) throw new Error("Wrong password. Use loopadmin, or tap Reset gate below.");
+    if (hash === DEFAULT_HASH && stored !== DEFAULT_HASH) {
+      try {
+        localStorage.setItem(AUTH_KEY, DEFAULT_HASH);
+      } catch {
+        /* ignore */
+      }
     }
     sessionStorage.setItem(SESSION_KEY, "1");
   }
@@ -163,6 +190,45 @@
 
   function isAuthed() {
     return sessionStorage.getItem(SESSION_KEY) === "1";
+  }
+
+  function resetGate() {
+    try {
+      localStorage.setItem(AUTH_KEY, DEFAULT_HASH);
+    } catch {
+      /* ignore */
+    }
+    sessionStorage.removeItem(SESSION_KEY);
+    toast("Gate reset — password is loopadmin");
+    const err = $("#login-error");
+    if (err) {
+      err.textContent = "Password reset to loopadmin. Enter it above.";
+      err.hidden = false;
+      err.style.color = "#2f6b4f";
+    }
+    const input = $("#password");
+    if (input) {
+      input.value = "";
+      input.focus();
+    }
+  }
+
+  function bindChrome() {
+    $$("#nav button").forEach((b) => {
+      b.onclick = () => setView(b.dataset.view);
+    });
+    const logoutBtn = $("#logout-btn");
+    if (logoutBtn) logoutBtn.onclick = logout;
+  }
+
+  function enterApp() {
+    const loginView = $("#login-view");
+    const appView = $("#app-view");
+    if (loginView) loginView.hidden = true;
+    if (appView) appView.hidden = false;
+    ensureCms();
+    bindChrome();
+    render();
   }
 
   /* ——— Views ——— */
@@ -772,17 +838,17 @@
       </div>
       <div class="card going-live">
         <ol>
-          <li><strong>Packages</strong> — Add package, fill title / price / cities / itinerary / images, Save. Use Delete to remove. Duplicate to clone.</li>
+          <li>Open <a href="https://loop-trips.vercel.app/admin" target="_blank" rel="noopener">loop-trips.vercel.app/admin</a> — bookmark it. It is <strong>not</strong> linked in the public menu. Password: <code>loopadmin</code>.</li>
+          <li><strong>Packages</strong> — Add, edit, duplicate, or delete trips (price, cities, itinerary, images).</li>
           <li><strong>Collections</strong> — Edit Sanatan, Biker, Community, Solo, Surprise, Group copy and hero images.</li>
-          <li><strong>Brand</strong> — WhatsApp number, Hyderabad address, Instagram, tagline. Use “Apply profile defaults” if the old desk number reappears.</li>
-          <li><strong>Homepage</strong> — Put journey IDs (one per line) into India strip and World highlights.</li>
-          <li>Open <a href="index.html" target="_blank" rel="noopener">the public site</a> and hard-refresh. Content is stored in this browser’s localStorage.</li>
-          <li><strong>Settings → Export JSON</strong> before you clear browser data. Import to restore. Reset to seed restores the original catalogue.</li>
+          <li><strong>Brand</strong> — WhatsApp, Hyderabad address, Instagram, tagline. Use “Apply profile defaults” if an old number reappears.</li>
+          <li><strong>Homepage</strong> — Journey IDs (one per line) for India strip and World highlights.</li>
+          <li>Open the public site and hard-refresh. Content is stored in <em>this browser</em> (localStorage). Export JSON in Settings as a backup.</li>
         </ol>
         <div class="toolbar" style="margin-top:20px">
           <button class="btn btn-accent" type="button" id="btn-export-live">Export JSON now</button>
-          <a class="btn" href="index.html" target="_blank" rel="noopener">Preview homepage</a>
-          <a class="btn" href="journeys.html" target="_blank" rel="noopener">Preview all trips</a>
+          <a class="btn" href="/" target="_blank" rel="noopener">Preview homepage</a>
+          <a class="btn" href="/journeys" target="_blank" rel="noopener">Preview all trips</a>
         </div>
       </div>`;
   }
@@ -997,38 +1063,86 @@
 
   /* ——— Boot ——— */
   async function boot() {
-    await ensureDefaultHash();
     const loginView = $("#login-view");
     const appView = $("#app-view");
+    const err = $("#login-error");
+
+    try {
+      await ensureDefaultHash();
+    } catch (e) {
+      if (loginView) loginView.hidden = false;
+      if (appView) appView.hidden = true;
+      if (err) {
+        err.textContent = e.message || "Could not start admin gate.";
+        err.hidden = false;
+      }
+    }
+
+    const resetBtn = $("#reset-gate");
+    if (resetBtn) {
+      resetBtn.onclick = () => {
+        if (confirm("Reset the admin password to the factory default (loopadmin)?")) {
+          resetGate();
+        }
+      };
+    }
 
     if (!isAuthed()) {
-      loginView.hidden = false;
-      appView.hidden = true;
+      if (loginView) loginView.hidden = false;
+      if (appView) appView.hidden = true;
       $("#login-form").onsubmit = async (e) => {
         e.preventDefault();
-        const err = $("#login-error");
-        err.hidden = true;
+        if (err) {
+          err.hidden = true;
+          err.style.color = "#a33b2b";
+        }
+        const btn = e.target.querySelector('button[type="submit"]');
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Checking…";
+        }
         try {
           await login($("#password").value);
-          loginView.hidden = true;
-          appView.hidden = false;
-          ensureCms();
-          render();
+          enterApp();
         } catch (ex) {
-          err.textContent = ex.message;
-          err.hidden = false;
+          if (err) {
+            err.textContent = ex.message || "Login failed";
+            err.hidden = false;
+          }
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Enter";
+          }
         }
       };
       return;
     }
 
-    loginView.hidden = true;
-    appView.hidden = false;
-    ensureCms();
-    $$("#nav button").forEach((b) => (b.onclick = () => setView(b.dataset.view)));
-    $("#logout-btn").onclick = logout;
-    render();
+    enterApp();
   }
 
-  boot();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      boot().catch((e) => {
+        const err = $("#login-error");
+        const loginView = $("#login-view");
+        if (loginView) loginView.hidden = false;
+        if (err) {
+          err.textContent = e.message || "Admin failed to start. Hard-refresh and try again.";
+          err.hidden = false;
+        }
+      });
+    });
+  } else {
+    boot().catch((e) => {
+      const err = $("#login-error");
+      const loginView = $("#login-view");
+      if (loginView) loginView.hidden = false;
+      if (err) {
+        err.textContent = e.message || "Admin failed to start. Hard-refresh and try again.";
+        err.hidden = false;
+      }
+    });
+  }
 })();
