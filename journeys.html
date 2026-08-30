@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>All trips — Loop Trips</title>
+  <meta name="description" content="All Loop Trips: Indian packages and international Spice Route Luxe journeys. Duration, cities, and price per person.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="journeys" class="page-light">
+  <div class="page-head">
+    <div class="wrap">
+      <p class="eyebrow">Spice Route Luxe</p>
+      <h1>All trips</h1>
+      <p>Indian packages sit with the world list. Each trip has a city list, number of days, and a per-person price.</p>
+    </div>
+  </div>
+
+  <section style="padding-top:12px">
+    <div class="wrap">
+      <div class="toolbar">
+        <div class="regions" id="regions">
+          <button class="chip on" data-collection="All">All</button>
+          <button class="chip" data-collection="sanatan">Sanatan</button>
+          <button class="chip" data-collection="biker">Biker</button>
+          <button class="chip" data-collection="community">Community</button>
+          <button class="chip" data-collection="solo">Solo</button>
+          <button class="chip" data-collection="surprise">Surprise</button>
+          <button class="chip" data-collection="group">Group</button>
+          <button class="chip" data-region="Europe">Europe</button>
+          <button class="chip" data-region="Africa">Africa</button>
+          <button class="chip" data-region="Asia">Asia</button>
+          <button class="chip" data-region="India">India</button>
+          <button class="chip" data-region="Islands">Islands</button>
+          <button class="chip" data-region="Middle East">Middle East</button>
+          <button class="chip" data-region="Oceania">Oceania</button>
+        </div>
+        <input class="search" id="search" type="search" placeholder="Search a country or city">
+      </div>
+      <p id="count"></p>
+      <div class="grid-3" id="catalog-grid"></div>
+    </div>
+  </section>
+  <script src="js/data.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+---
+description: Loop Trips owners, git/GitHub identity, and Vercel project-only auth
+alwaysApply: true
+---
+
+# Loop Trips project identity
+
+## People / accounts (this project only)
+- **Git author:** `praveenwork` &lt;padamatatarun42@gmail.com&gt; (local repo only)
+- **GitHub account:** Sai Praveen → **`sai713830`** (https://github.com/sai713830)
+- **Do not use** `srinadhkommalapati833-creator` here — that account is **only** for Saver web
+- Do **not** change global `git config`
+
+## Evidence / mapping
+- Saver web → `srinadhkommalapati833-creator/saver-web`
+- Agent X (global-style) → `sai713830/agentx`
+- Git credential store includes `sai713830`
+
+## Vercel (isolated)
+- Account: `looptripsindia-7149` · team scope `loop-trips` · project `loop-trips`
+- Live: https://loop-trips.vercel.app
+- Auth: `.env.local` → `VERCEL_TOKEN` only
+- Never run global `vercel login` for this project
+
+## Source of truth
+See `.project-identity.json` in the repo root.

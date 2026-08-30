@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin — Loop Trips</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div id="login-view" class="admin-login" hidden>
+    <form class="login-card" id="login-form">
+      <p class="eyebrow" style="margin:0;letter-spacing:.08em;text-transform:uppercase;font-size:.75rem;color:#6b6560">Loop Trips</p>
+      <h1>Admin</h1>
+      <p>Manage packages, collections, and site copy. Changes appear on the public site in this browser.</p>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn btn-accent" type="submit" style="width:100%">Enter</button>
+      <p class="hint">Default password: <strong>loopadmin</strong> — change it in Settings after login.</p>
+      <p id="login-error" style="color:#a33b2b;font-size:.9rem;margin:10px 0 0" hidden></p>
+    </form>
+  </div>
+
+  <div id="app-view" class="admin-shell" hidden>
+    <aside class="admin-side">
+      <div class="brand">Loop Trips<small>Content admin</small></div>
+      <nav class="admin-nav" id="nav">
+        <button type="button" data-view="packages" class="on">Packages</button>
+        <button type="button" data-view="collections">Collections</button>
+        <button type="button" data-view="brand">Brand</button>
+        <button type="button" data-view="home">Homepage</button>
+        <button type="button" data-view="bookings">Bookings</button>
+        <button type="button" data-view="settings">Settings</button>
+        <button type="button" data-view="live">Going live</button>
+      </nav>
+      <div class="side-foot">
+        <a href="index.html" target="_blank" rel="noopener">Open public site</a>
+        <button type="button" id="logout-btn">Log out</button>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <div id="view-root"></div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

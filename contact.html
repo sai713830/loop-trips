@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact — Loop Trips</title>
+  <meta name="description" content="Call, WhatsApp, or email the Loop Trips desk in Bengaluru. License and IATA details on this page.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="contact" class="page-light">
+  <div class="page-hero" style="min-height:46vh">
+    <img class="bg" src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=2000&q=80" alt="Taj Mahal at dusk">
+    <div class="wrap">
+      <p class="eyebrow">Contact</p>
+      <h1>Write, call, or WhatsApp the desk.</h1>
+      <p>Phone and WhatsApp for a fast hold. Email for longer briefs. The enquiry form confirms on the page — it does not send email yet.</p>
+    </div>
+  </div>
+
+  <section style="padding-top:12px">
+    <div class="wrap contact-grid">
+      <div id="contact-desk"></div>
+      <form id="contact-form" class="form-grid">
+        <div class="field">
+          <label for="c-name">Name <span class="req">*</span></label>
+          <input id="c-name" required autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="c-email">Email <span class="req">*</span></label>
+          <input id="c-email" type="email" required autocomplete="email">
+        </div>
+        <div class="field full">
+          <label for="c-about">Which collection</label>
+          <input id="c-about" placeholder="Sanatan, Biker, Surprise…">
+        </div>
+        <div class="field full">
+          <label for="c-msg">Message <span class="req">*</span></label>
+          <textarea id="c-msg" rows="5" required></textarea>
+        </div>
+        <div class="field full">
+          <button class="btn btn-fill" type="submit">Send to the desk</button>
+        </div>
+      </form>
+      <div id="contact-done" class="confirm-box" hidden style="grid-column:1/-1">
+        <p class="eyebrow">Received</p>
+        <h2>The desk has your note.</h2>
+        <p style="color:var(--mute)">In the live house, a designer would reply within a day. Prefer WhatsApp for a same-day reply.</p>
+        <div class="btn-row" style="justify-content:center;margin-top:24px">
+          <a class="btn btn-fill" href="https://wa.me/918045672100" target="_blank" rel="noopener">WhatsApp</a>
+          <a class="btn btn-dark" href="journeys.html">Browse trips</a>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script src="js/data.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

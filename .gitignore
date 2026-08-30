@@ -1,0 +1,13 @@
+# Local secrets & Vercel (this project only)
+.env
+.env.local
+.env.*.local
+.vercel
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Netlify local cache (if present)
+.netlify

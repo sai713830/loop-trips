@@ -1,0 +1,24 @@
+{
+  "project": "Loop Trips",
+  "git": {
+    "author_name": "praveenwork",
+    "author_email": "padamatatarun42@gmail.com",
+    "note": "Local git identity for THIS repo only (Praveen work). Never change global git config from agents."
+  },
+  "github": {
+    "account_display_name": "Sai Praveen",
+    "username": "sai713830",
+    "profile": "https://github.com/sai713830",
+    "email_seen_on_commits": "sai713830@gmail.com",
+    "note": "Global-workspace GitHub for Loop Trips and most projects. Confirmed via Agent X remote + Windows git-credentials.",
+    "do_not_use_for_this_repo": "srinadhkommalapati833-creator",
+    "srinadh_is_only_for": "Saver web (https://github.com/srinadhkommalapati833-creator/saver-web)"
+  },
+  "vercel": {
+    "account": "looptripsindia-7149",
+    "team_scope": "loop-trips",
+    "project": "loop-trips",
+    "production_url": "https://loop-trips.vercel.app",
+    "auth": "Use .env.local VERCEL_TOKEN only. Do not vercel login globally for this project."
+  }
+}

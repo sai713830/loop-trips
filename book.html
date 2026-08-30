@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book a trip — Loop Trips</title>
+  <meta name="description" content="Demo booking for Loop Trips. No payment is taken.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="book" class="page-light">
+  <div class="page-hero" style="min-height:48vh">
+    <img class="bg" src="https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=2000&q=80" alt="Jaipur palace courtyard">
+    <div class="wrap">
+      <p class="eyebrow">Booking</p>
+      <h1>Book a trip.</h1>
+      <p>Three steps: pick the trip, add guest details, confirm. This is a demo — you get a Loop reference, no card is charged.</p>
+    </div>
+  </div>
+
+  <section style="padding-top:12px">
+    <div class="wrap">
+      <div id="wizard" class="wizard">
+        <div>
+          <div class="steps">
+            <span class="on">1 Trip</span>
+            <span>2 Guests</span>
+            <span>3 Confirm</span>
+          </div>
+
+          <div data-step-panel="1">
+            <div class="form-grid">
+              <div class="field full">
+                <label for="journey-select">Trip <span class="req">*</span></label>
+                <select id="journey-select" required></select>
+              </div>
+              <div class="field">
+                <label for="start">Departure <span class="req">*</span></label>
+                <input id="start" type="date" required>
+              </div>
+              <div class="field">
+                <label for="guests">Guests <span class="req">*</span></label>
+                <input id="guests" type="number" min="1" max="24" value="2" required>
+              </div>
+              <div class="field full">
+                <label>Suite standard</label>
+                <div class="suite-list" id="suites"></div>
+              </div>
+              <div class="field full">
+                <label>Additions</label>
+                <div class="addon-list" id="addons"></div>
+              </div>
+            </div>
+          </div>
+
+          <div data-step-panel="2" hidden>
+            <div class="form-grid">
+              <div class="field">
+                <label for="first">First name <span class="req">*</span></label>
+                <input id="first" autocomplete="given-name" required>
+              </div>
+              <div class="field">
+                <label for="last">Last name <span class="req">*</span></label>
+                <input id="last" autocomplete="family-name" required>
+              </div>
+              <div class="field">
+                <label for="email">Email <span class="req">*</span></label>
+                <input id="email" type="email" autocomplete="email" required>
+              </div>
+              <div class="field">
+                <label for="phone">Telephone / WhatsApp <span class="req">*</span></label>
+                <input id="phone" type="tel" autocomplete="tel" required>
+              </div>
+              <div class="field full">
+                <label for="notes">Notes for the designer</label>
+                <textarea id="notes" rows="4" placeholder="Vows, pace, diet, adjoining rooms, who is organising the group…"></textarea>
+              </div>
+            </div>
+            <p id="form-error" style="color:#8a3a2a;margin-top:16px;min-height:1.2em"></p>
+          </div>
+
+          <div data-step-panel="3" hidden>
+            <p class="eyebrow">Review</p>
+            <h2 style="font-size:2.6rem;margin:8px 0 16px">Nothing is charged.</h2>
+            <p style="color:var(--mute);max-width:46ch">Confirm to issue a demo reference. Check Your hold for trip, price, and guests. You can release it later from My bookings. See <a href="cancellation.html">cancellation</a> and <a href="refund.html">refund</a> policies.</p>
+          </div>
+
+          <div class="btn-row" style="margin-top:36px">
+            <button class="btn btn-dark" id="back-btn" type="button" hidden>Back</button>
+            <button class="btn btn-fill" id="next-btn" type="button">Continue</button>
+          </div>
+        </div>
+
+        <aside class="summary">
+          <p class="eyebrow">Your hold</p>
+          <img id="sum-img" alt="" style="width:100%;height:180px;object-fit:cover;margin:14px 0 8px">
+          <h3 id="sum-title"></h3>
+          <div id="sum-body"></div>
+          <div class="total" id="sum-total"></div>
+          <p style="opacity:.5;margin-top:8px;font-size:.78rem">Estimated total · demo</p>
+        </aside>
+      </div>
+
+      <div id="confirm" class="confirm-box" hidden>
+        <p class="eyebrow">Held</p>
+        <h2>Your journey is reserved.</h2>
+        <p id="confirm-copy" style="color:var(--mute)"></p>
+        <p class="ref" id="ref-code"></p>
+        <div class="btn-row" style="justify-content:center">
+          <a class="btn btn-fill" href="bookings.html">View reservations</a>
+          <a class="btn btn-dark" href="journeys.html">Return to the list</a>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script src="js/data.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
