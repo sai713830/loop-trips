@@ -5,8 +5,10 @@ LOOP.brand = {
   wordmark: "LOOP",
   house: "Loop Trips",
   collection: "Spice Route Luxe",
-  tagline: "Desh pehle. Phir jahaan dil jaaye.",
-  logoMark: "Desh pehle · Duniya tak",
+  tagline: "Bharat at the heart of every journey.",
+  logoMark: "Bharat first · World beyond",
+  logo: "img/logo.png",
+  logoAlt: "Loop Trips — Bharat first, world beyond",
   phone: "+91 99511 39299",
   phoneTel: "+919951139299",
   whatsapp: "+91 99511 39299",
@@ -27,14 +29,18 @@ LOOP.brand = {
 };
 
 LOOP.trust = {
+  /* Leave rating blank until Google / WhatsApp reviews are verified. */
   rating: "",
-  tripsBooked: "",
+  /* Soft proof only — no invented trip counts. */
+  tripsBooked: "India & beyond",
+  tripsLabel: "Private weeks planned",
   label: "Private trips · India first",
   licenseNote: "Hyderabad desk · Hitech City",
-  iataNote: "",
+  /* Extra home-proof span (optional). */
+  iataNote: "Private weeks · India & beyond",
 };
 
-/* Real team bios can be added from Admin → Brand. Empty until then. */
+/* Real team bios: Admin → Brand. Empty until real names/photos are ready. */
 LOOP.team = [];
 
 LOOP.reviews = [

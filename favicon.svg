@@ -1,5 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" fill="#0b0a09"/>
-  <path d="M16 5c-6.075 0-11 4.925-11 11s4.925 11 11 11 11-4.925 11-11" fill="none" stroke="#f4efe6" stroke-width="1.2"/>
-  <path d="M16 9.5a6.5 6.5 0 1 0 6.5 6.5" fill="none" stroke="#c45c26" stroke-width="1.2"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Loop Trips">
+  <defs>
+    <linearGradient id="lt-gradient" x1="4" y1="16" x2="28" y2="16" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#00e8c0"/>
+      <stop offset="0.45" stop-color="#00b8e8"/>
+      <stop offset="1" stop-color="#0048c8"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="7" fill="#080808"/>
+  <path d="M10.5 16c0-3.03 2.47-5.5 5.5-5.5 1.46 0 2.79.57 3.78 1.5 1-1.14 2.46-1.86 4.07-1.86 3.03 0 5.5 2.47 5.5 5.5s-2.47 5.5-5.5 5.5c-1.61 0-3.07-.72-4.07-1.86-.99.93-2.32 1.5-3.78 1.5-3.03 0-5.5-2.47-5.5-5.5z" fill="none" stroke="url(#lt-gradient)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M13.5 18.5l1.2-2.4 1.4 1.1 1.6-3.2" fill="none" stroke="#003878" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <path d="M21.5 11.5l2.2 1.1-1.4.8.6 1.6" fill="none" stroke="#003878" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
 </svg>

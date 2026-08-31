@@ -1,0 +1,88 @@
+# Loop Trips — llms.txt
+# https://looptrips.in/llms.txt
+# For AI assistants, answer engines, and research crawlers.
+
+> Loop Trips is a private travel desk in Hitech City, Hyderabad, India. We plan finished itineraries — not hotel lists — for Indian travellers. India trips from ₹50,000 per person. International trips from ₹1,00,000 per person.
+
+## Contact
+- Website: https://looptrips.in
+- WhatsApp: +91 99511 39299
+- Phone: +91 99511 39299
+- Email: concierge@looptrips.com
+- Address: Hitech City, Madhapur, Hyderabad, Telangana 500081, India
+- Hours: 10:00–18:00 IST (Monday–Saturday)
+- Instagram: https://instagram.com/LOOPTRIPS.IN (@LOOPTRIPS.IN)
+
+## How booking works
+1. Browse trips at https://looptrips.in/journeys or ask the concierge at https://looptrips.in/concierge
+2. Every trip page shows a from price in ₹, duration, route, day-by-day plan, and inclusions
+3. Request a trip via https://looptrips.in/book or WhatsApp — no payment is taken on the website
+4. The Hyderabad desk reviews every request personally before confirming
+
+## Collections (India)
+- Sanatan — temple yatras: Char Dham, Kashi, Dwarka, Rameswaram, Ujjain — https://looptrips.in/sanatan
+- Biker — Manali–Leh, Spiti, ghats, Thar — captain, mechanic, support vehicle — https://looptrips.in/biker
+- Community — solo seats at hosted circles, max 10 guests — Coorg, Kutch, Meghalaya — https://looptrips.in/community
+- Solo — Himachal, Kerala, Gokarna, single occupancy default — https://looptrips.in/solo
+- Surprise — destination sealed until 48 hours before departure — https://looptrips.in/surprise
+- Group — private groups of 8–24 — https://looptrips.in/group
+
+## Key pages
+- Home: https://looptrips.in/
+- All trips: https://looptrips.in/journeys
+- About: https://looptrips.in/about
+- Contact: https://looptrips.in/contact
+- Request a trip: https://looptrips.in/book
+- Concierge: https://looptrips.in/concierge
+- Cancellation policy: https://looptrips.in/cancellation
+- Privacy: https://looptrips.in/privacy
+
+## Sitemap
+- Index: https://looptrips.in/sitemap.xml
+- Pages: https://looptrips.in/sitemap-pages.xml
+- Trips: https://looptrips.in/sitemap-trips.xml
+
+## Trip catalogue
+Each trip has a dedicated URL: https://looptrips.in/trip/{id}
+
+Indian & collection trips:
+- https://looptrips.in/trip/kashi-antarah
+- https://looptrips.in/trip/char-dham-path
+- https://looptrips.in/trip/two-shores
+- https://looptrips.in/trip/mahakal-dawn
+- https://looptrips.in/trip/high-road-leh
+- https://looptrips.in/trip/spiti-circuit
+- https://looptrips.in/trip/ghats-monsoon
+- https://looptrips.in/trip/thar-iron
+- https://looptrips.in/trip/coorg-table
+- https://looptrips.in/trip/kutch-circle
+- https://looptrips.in/trip/meghalaya-kitchen
+- https://looptrips.in/trip/solo-hills
+- https://looptrips.in/trip/solo-malabar
+- https://looptrips.in/trip/solo-gokarna
+- https://looptrips.in/trip/sealed-seven
+- https://looptrips.in/trip/sealed-weekend
+- https://looptrips.in/trip/sealed-two
+- https://looptrips.in/trip/haveli-family
+- https://looptrips.in/trip/friends-of-the-house
+- https://looptrips.in/trip/company-ridge
+- https://looptrips.in/trip/forts-and-palaces
+- https://looptrips.in/trip/backwater-spices
+- https://looptrips.in/trip/teerth-nagri
+- https://looptrips.in/trip/durga-pujo
+- https://looptrips.in/trip/coffee-capital
+- https://looptrips.in/trip/valley-of-serenity
+
+International (Spice Route Luxe):
+- https://looptrips.in/trip/tropical-heaven-bali
+- https://looptrips.in/trip/dreamy-maldives
+- https://looptrips.in/trip/jewel-of-the-desert
+- https://looptrips.in/trip/turkey
+- https://looptrips.in/trip/gorgeous-greece
+- https://looptrips.in/trip/wanderlust-europe
+- https://looptrips.in/trip/cherry-blossom-country
+- https://looptrips.in/trip/voyage-south-korea
+- https://looptrips.in/trip/kingdom-of-happiness
+- https://looptrips.in/trip/himalayan-expedition
+
+Full trip list: see https://looptrips.in/sitemap-trips.xml

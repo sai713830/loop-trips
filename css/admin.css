@@ -9,7 +9,7 @@
   --admin-ok: #2f6b4f;
   --admin-danger: #a33b2b;
   --serif: "Newsreader", Georgia, serif;
-  --sans: "Outfit", system-ui, sans-serif;
+  --sans: "DM Sans", system-ui, sans-serif;
 }
 
 * {
@@ -93,6 +93,20 @@ a {
   font-family: var(--serif);
   font-size: 1.4rem;
   margin: 0 8px 20px;
+}
+
+.admin-side .brand-logo {
+  display: block;
+  height: 52px;
+  width: auto;
+  margin-bottom: 8px;
+}
+
+.gate-logo {
+  display: block;
+  height: 64px;
+  width: auto;
+  margin: 0 auto 12px;
 }
 
 .admin-side .brand small {

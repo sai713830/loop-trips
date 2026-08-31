@@ -1,8 +1,34 @@
+# Loop Trips — https://looptrips.in
+# AI / answer-engine crawlers welcome. See also /llms.txt
+
 User-agent: *
+Allow: /
 Disallow: /admin
 Disallow: /admin.html
 Disallow: /admin-gate.html
+Disallow: /bookings
+Disallow: /bookings.html
 Disallow: /css/admin.css
 Disallow: /js/admin.js
 Disallow: /api/admin-login
 Disallow: /api/admin-logout
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://looptrips.in/sitemap.xml

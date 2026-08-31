@@ -3,16 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Loop Trips — Desh pehle, duniya tak</title>
+  <title>Private India &amp; World Trips from Hyderabad | Loop Trips</title>
   <meta name="description" content="Loop Trips plans private trips across India from ₹50,000 and the world from ₹1,00,000. Sanatan, biker, community, solo, surprise, and group journeys — plus Bali, Maldives, Dubai, Europe and beyond.">
-  <meta property="og:title" content="Loop Trips — Desh pehle · Duniya tak">
-  <meta property="og:description" content="Desh pehle. Phir jahaan dil jaaye. Indian packages from ₹50,000. International from ₹1,00,000.">
-  <meta property="og:image" content="https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=1600&q=80">
+  <meta property="og:title" content="Private India &amp; World Trips from Hyderabad | Loop Trips">
+  <meta property="og:description" content="Private itineraries for Indian travellers. India from ₹50,000, the world from ₹1,00,000. Finished routes — shaped to your dates and budget.">
+  <meta property="og:image" content="https://looptrips.in/img/og-default.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+  <script src="js/brand-assets.js"></script>
+  <script src="js/seo.js"></script>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 </head>
 <body data-page="home">
   <section class="home-hero">
@@ -20,15 +22,16 @@
       <img src="https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=2400&q=80" alt="Jaipur palace, Rajasthan">
     </div>
     <div class="home-hero-inner">
-      <p class="eyebrow light">Now booking · Realm of Forts and Palaces</p>
-      <h1>Loop Trips</h1>
-      <p class="lede">Desh pehle — phir jahaan dil jaaye. Private itineraries from ₹50,000 at home, from ₹1,00,000 abroad. One floor price. No ceiling. We reshape the week to your budget.</p>
+      <p class="eyebrow light">Private travel desk · Hyderabad</p>
+      <h1>You bring the dream. We hold the week.</h1>
+      <p class="lede">Route, stays, transfers, and pace — planned before you pack. India from ₹50,000, the world from ₹1,00,000. Tell us your dates; our team handles the rest.</p>
       <div class="btn-row">
-        <a class="btn btn-light" href="journey.html?id=forts-and-palaces">View Rajasthan</a>
-        <a class="btn btn-ghost" href="concierge.html">Ask the concierge</a>
+        <a class="btn btn-light" href="journeys.html">Find your trip</a>
+        <a class="btn btn-ghost" href="concierge.html">Plan with concierge</a>
       </div>
       <div class="home-proof" id="home-proof">
         <span>Private trips · India first</span>
+        <span>Private weeks · India &amp; beyond</span>
         <span>Hyderabad desk · Hitech City</span>
         <span>WhatsApp +91 99511 39299</span>
         <span>@LOOPTRIPS.IN</span>
@@ -88,12 +91,25 @@
     </div>
   </section>
 
-  <section class="map-band" id="world">
-    <div class="wrap">
+  <section class="map-band" id="world-map">
+    <div class="wrap-wide">
       <div class="section-head">
         <div>
           <p class="eyebrow">The world</p>
           <h2>Put a finger on the map</h2>
+        </div>
+      </div>
+      <p class="section-lede">Tap a pin — India or international. The concierge reads our package list and shows from-prices and trip details right below the map.</p>
+      <div id="world-map-root"></div>
+    </div>
+  </section>
+
+  <section class="intl-packages-band" id="world">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">International</p>
+          <h2>International packages</h2>
         </div>
         <a class="more" href="journeys.html">Full list</a>
       </div>
@@ -118,12 +134,12 @@
     <div class="wrap">
       <div class="section-head">
         <div>
-          <p class="eyebrow">Social proof</p>
+          <p class="eyebrow">Traveller notes</p>
           <h2>What travellers say</h2>
         </div>
         <a class="more" href="about.html">About the desk</a>
       </div>
-      <p class="section-lede">Early traveller stories from our first journeys — names and details may be updated as we collect more verified reviews.</p>
+      <p class="section-lede">Guests we planned for — Rajasthan, Coorg, Ladakh, Kerala. Clear from-prices, WhatsApp replies from the Hyderabad desk.</p>
       <div class="reviews-grid" id="reviews-grid"></div>
     </div>
   </section>
@@ -180,8 +196,49 @@
       </div>
     </div>
   </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Questions</p>
+          <h2>Frequently asked</h2>
+        </div>
+      </div>
+      <div class="how" data-seo-faq>
+        <article>
+          <span class="n">1</span>
+          <h3>How do I book a trip with Loop Trips?</h3>
+          <p>Open any trip page, check the from price and day-by-day plan, then request a trip via the form or WhatsApp. Our Hyderabad desk reviews every request personally. No payment is taken on this website.</p>
+        </article>
+        <article>
+          <span class="n">2</span>
+          <h3>What does the from price mean?</h3>
+          <p>Every trip shows a starting price in ₹ per person — the floor, not a locked quote. Classic, Prestige, Royal, or a custom ceiling via the concierge can reshape stays, pace, and cities.</p>
+        </article>
+        <article>
+          <span class="n">3</span>
+          <h3>Where is the Loop Trips desk?</h3>
+          <p>Hitech City, Madhapur, Hyderabad. Open 10:00–18:00 IST. WhatsApp +91 99511 39299 for the fastest reply.</p>
+        </article>
+        <article>
+          <span class="n">4</span>
+          <h3>What types of trips do you plan?</h3>
+          <p>Sanatan temple yatras, biker routes, community solo circles, solo itineraries, surprise destinations, private groups, and international Spice Route Luxe journeys.</p>
+        </article>
+        <article>
+          <span class="n">5</span>
+          <h3>Can I customise a trip to my budget?</h3>
+          <p>Yes. Tell the concierge your ceiling — for example ₹60,000 in Kerala or ₹2L for Bali — and we reshape the itinerary to what you can spend.</p>
+        </article>
+      </div>
+    </div>
+  </section>
   <script src="js/data.js"></script>
   <script src="js/content.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="js/concierge.js"></script>
+  <script src="js/world-map.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

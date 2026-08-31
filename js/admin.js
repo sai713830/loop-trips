@@ -246,7 +246,7 @@
               <td><span class="badge ${j.status === "Open" ? "on" : ""}">${escapeHtml(j.status || "—")}</span></td>
               <td class="actions">
                 <button class="btn" type="button" data-edit="${escapeAttr(j.id)}">Edit</button>
-                <a class="btn" href="journey.html?id=${encodeURIComponent(j.id)}" target="_blank" rel="noopener">Preview</a>
+                <a class="btn" href="/trip/${encodeURIComponent(j.id)}" target="_blank" rel="noopener">Preview</a>
                 <button class="btn" type="button" data-dup="${escapeAttr(j.id)}">Duplicate</button>
                 <button class="btn btn-danger" type="button" data-del="${escapeAttr(j.id)}">Delete</button>
               </td>
@@ -269,7 +269,7 @@
         </div>
         <div class="toolbar">
           <button class="btn" type="button" id="btn-cancel-edit">Back</button>
-          ${!isNew ? `<a class="btn" href="journey.html?id=${encodeURIComponent(j.id)}" target="_blank" rel="noopener">Preview</a>` : ""}
+          ${!isNew ? `<a class="btn" href="/trip/${encodeURIComponent(j.id)}" target="_blank" rel="noopener">Preview</a>` : ""}
           <button class="btn btn-accent" type="button" id="btn-save-pkg">Save package</button>
         </div>
       </div>
@@ -627,23 +627,31 @@
       </form>
       <form class="card" id="trust-form">
         <h3 style="margin-top:0;font-family:var(--serif);font-weight:500">Homepage proof lines</h3>
-        <p style="color:var(--admin-mute);font-size:.9rem">Only fill what is true. Blank fields stay hidden.</p>
+        <p style="color:var(--admin-mute);font-size:.9rem">Only fill what is true. Blank rating stays hidden. Soft trips text is OK — no invented numbers.</p>
         <div class="grid-form">
           <div class="field">
             <label>Main proof line</label>
             <input name="label" value="${escapeAttr(t.label || "")}" placeholder="Private trips · India first">
           </div>
           <div class="field">
-            <label>Second proof line</label>
+            <label>Desk proof line</label>
             <input name="licenseNote" value="${escapeAttr(t.licenseNote || "")}" placeholder="Hyderabad desk · Hitech City">
           </div>
           <div class="field">
-            <label>Guest rating (optional)</label>
-            <input name="rating" value="${escapeAttr(t.rating || "")}" placeholder="e.g. 4.8">
+            <label>Soft trips line (home proof)</label>
+            <input name="iataNote" value="${escapeAttr(t.iataNote || "")}" placeholder="Private weeks · India & beyond">
           </div>
           <div class="field">
-            <label>Trips booked (optional)</label>
-            <input name="tripsBooked" value="${escapeAttr(t.tripsBooked || "")}" placeholder="e.g. 200+">
+            <label>About stat — trips value</label>
+            <input name="tripsBooked" value="${escapeAttr(t.tripsBooked || "")}" placeholder="India & beyond (or 200+ when true)">
+          </div>
+          <div class="field">
+            <label>About stat — trips label</label>
+            <input name="tripsLabel" value="${escapeAttr(t.tripsLabel || "")}" placeholder="Private weeks planned">
+          </div>
+          <div class="field">
+            <label>Guest rating (optional)</label>
+            <input name="rating" value="${escapeAttr(t.rating || "")}" placeholder="Leave blank until verified">
           </div>
         </div>
         <button class="btn btn-accent" type="button" id="trust-save" style="margin-top:12px">Save proof lines</button>
@@ -861,9 +869,10 @@
           ...(state.cms.trust || {}),
           label: form.label.value.trim(),
           licenseNote: form.licenseNote.value.trim(),
-          rating: form.rating.value.trim(),
+          iataNote: form.iataNote.value.trim(),
           tripsBooked: form.tripsBooked.value.trim(),
-          iataNote: "",
+          tripsLabel: form.tripsLabel.value.trim(),
+          rating: form.rating.value.trim(),
         };
         persist();
       };

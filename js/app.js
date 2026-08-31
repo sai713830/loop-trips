@@ -28,6 +28,20 @@
 
   const brand = () => LOOP.brand || {};
 
+  function brandAssets() {
+    return window.LOOP_BRAND_ASSETS || {
+      logo: "img/logo.png",
+      logoMark: "img/logo-mark.png",
+      logoAlt: "Loop Trips — Bharat first, world beyond",
+    };
+  }
+
+  function logoImg(className, height, variant) {
+    const a = brandAssets();
+    const src = variant === "mark" ? a.logoMark || a.logo : a.logo;
+    return `<img src="${src}" alt="${a.logoAlt}" class="${className}" height="${height}" width="auto" decoding="async">`;
+  }
+
   function waBookingLink(message) {
     const base = brand().whatsappLink || "https://wa.me/919951139299";
     if (!message) return base;
@@ -60,11 +74,6 @@
     <path d="M40 24C49.5 24 56 30.5 56 40C56 49.5 49.5 56 40 56C30.5 56 24 49.5 24 40C24 30.5 30.5 24 40 24Z" stroke="currentColor" stroke-width="1.1"/>
   </svg>`;
 
-  const logoSvg = `<svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
-    <path d="M16 4.5c-6.35 0-11.5 5.15-11.5 11.5S9.65 27.5 16 27.5 27.5 22.35 27.5 16" stroke="currentColor" stroke-width="1.2"/>
-    <path d="M16 9.2a6.8 6.8 0 1 0 6.8 6.8" stroke="#c45c26" stroke-width="1.2"/>
-  </svg>`;
-
   function colOf(j) {
     return (LOOP.collections || []).find((c) => c.id === j.collection) || LOOP.world;
   }
@@ -75,12 +84,8 @@
     const b = brand();
     const cur = getCurrency();
     return `<header class="site-header${over ? " over-hero" : ""}" id="header">
-      <a class="logo" href="index.html">
-        ${logoSvg}
-        <span class="logo-text">
-          <span class="logo-name">Loop Trips</span>
-          <span class="logo-mark">${b.logoMark || b.tagline || "Desh pehle · Duniya tak"}</span>
-        </span>
+      <a class="logo" href="index.html" aria-label="Loop Trips home">
+        ${logoImg("logo-img", 42, "mark")}
       </a>
       <nav class="nav" id="nav" aria-label="Primary">
         <div class="nav-primary">
@@ -134,8 +139,8 @@
       <div class="wrap">
         <div class="foot-top">
           <div class="foot-brand">
-            <a class="foot-logo" href="index.html">${logoSvg}<span>Loop Trips</span></a>
-            <p class="foot-tagline">${b.tagline || "Desh pehle. Phir jahaan dil jaaye."} India from ₹50,000 — the world from ₹1,00,000. Desk in ${b.city || "Hyderabad"}.</p>
+            <a class="foot-logo" href="index.html" aria-label="Loop Trips home">${logoImg("foot-logo-img", 68)}</a>
+            <p class="foot-tagline">${b.tagline || "Bharat at the heart of every journey."} India from ₹50,000 — the world from ₹1,00,000. Desk in ${b.city || "Hyderabad"}.</p>
             ${trust.label ? `<p class="foot-trust">${trust.label}</p>` : ""}
             <p class="foot-hours">Open ${b.hours || "10:00–18:00 IST"}${b.license ? ` · ${b.license}` : ""}${b.iata ? ` · ${b.iata}` : ""} · WhatsApp ${b.whatsapp || b.phone || "+91 99511 39299"}</p>
           </div>
@@ -159,6 +164,7 @@
             <a href="tel:${b.phoneTel || "+919951139299"}">Call ${b.phone || "+91 99511 39299"}</a>
             <a href="about.html">About</a>
             <a href="contact.html">Contact</a>
+            <a href="affiliates.html">Affiliates</a>
             <a href="concierge.html">Concierge</a>
           </div>
           <div class="foot-col">
@@ -188,7 +194,7 @@
         ? `<p class="seats">${j.seats} seat${j.seats === 1 ? "" : "s"} left in this circle</p>`
         : "";
     const kicker = j.collection && j.collection !== "world" ? `${j.country} · ${colOf(j).name}` : `${j.country} · ${j.region}`;
-    return `<a class="journey-card" href="journey.html?id=${j.id}">
+    return `<a class="journey-card" href="${tripHref(j.id)}">
       <div class="thumb">
         <img src="${j.image || ""}" alt="${j.title}, ${j.country}" loading="lazy">
       </div>
@@ -244,7 +250,22 @@
     });
   }
 
+  function tripHref(id) {
+    if (window.LOOP_SEO && typeof window.LOOP_SEO.tripPath === "function") {
+      return window.LOOP_SEO.tripPath(id);
+    }
+    return `/trip/${encodeURIComponent(id)}`;
+  }
+
   function param(name) {
+    if (name === "id") {
+      if (window.LOOP_SEO && typeof window.LOOP_SEO.journeyIdFromLocation === "function") {
+        const fromPath = window.LOOP_SEO.journeyIdFromLocation();
+        if (fromPath) return fromPath;
+      }
+      const match = location.pathname.match(/\/trip\/([^/]+)\/?$/);
+      if (match) return decodeURIComponent(match[1]);
+    }
     return new URLSearchParams(location.search).get(name);
   }
 
@@ -282,7 +303,7 @@
         .filter(Boolean);
       strip.innerHTML = picks
         .map(
-          (j) => `<a class="dest-tile" href="journey.html?id=${j.id}">
+          (j) => `<a class="dest-tile" href="${tripHref(j.id)}">
             <img src="${j.image}" alt="${j.country}" loading="lazy">
             <span>${j.country}</span>
           </a>`
@@ -343,8 +364,16 @@
     if (proof) {
       const t = LOOP.trust || {};
       const b = brand();
+      const softTrips =
+        t.iataNote ||
+        (t.tripsBooked && !/^\d/.test(String(t.tripsBooked).trim())
+          ? String(t.tripsBooked).trim()
+          : t.tripsBooked
+            ? `${t.tripsBooked} trips held`
+            : "");
       const bits = [
         t.label || "Private trips · India first",
+        softTrips,
         t.licenseNote || (b.city ? `${b.city} desk` : ""),
         b.whatsapp || b.phone ? `WhatsApp ${b.whatsapp || b.phone}` : "",
         b.instagramHandle || "",
@@ -354,6 +383,8 @@
 
     renderReviews("#reviews-grid");
     renderGallery("#gallery-grid");
+
+    if (typeof window.renderWorldMap === "function") window.renderWorldMap();
   }
 
   function stars(n) {
@@ -398,8 +429,16 @@
     const stats = $("#about-stats");
     if (stats) {
       const cells = [];
-      if (trust.rating) cells.push(`<div class="about-stat"><strong>${trust.rating}★</strong><span>Guest rating</span></div>`);
-      if (trust.tripsBooked) cells.push(`<div class="about-stat"><strong>${trust.tripsBooked}</strong><span>Trips booked</span></div>`);
+      if (trust.rating) {
+        cells.push(
+          `<div class="about-stat"><strong>${trust.rating}★</strong><span>${trust.ratingLabel || "Guest rating"}</span></div>`
+        );
+      }
+      if (trust.tripsBooked) {
+        const numeric = /^\d/.test(String(trust.tripsBooked).trim());
+        const tripsSpan = trust.tripsLabel || (numeric ? "Trips booked" : "Private weeks planned");
+        cells.push(`<div class="about-stat"><strong>${trust.tripsBooked}</strong><span>${tripsSpan}</span></div>`);
+      }
       if (b.years) cells.push(`<div class="about-stat"><strong>${b.years}+</strong><span>Years at the desk</span></div>`);
       cells.push(`<div class="about-stat"><strong>WhatsApp</strong><span>${b.whatsapp || b.phone || "+91 99511 39299"}</span></div>`);
       cells.push(`<div class="about-stat"><strong>${b.city || "Hyderabad"}</strong><span>Desk</span></div>`);
@@ -449,7 +488,6 @@
       return;
     }
 
-    document.title = `${c.name} — Loop Trips`;
     const trips = LOOP.journeys.filter((j) => j.collection === c.id);
 
     $("#collection-root").innerHTML = `
@@ -508,6 +546,9 @@
     if (c.id === "surprise") renderSurpriseRitual();
     if (c.id === "group") renderGroupAssemble();
     if (c.id === "community") renderCommunityDetail();
+    if (window.LOOP_SEO && typeof window.LOOP_SEO.applyCollection === "function") {
+      window.LOOP_SEO.applyCollection(c);
+    }
   }
 
   function renderCommunityDetail() {
@@ -619,7 +660,7 @@
           <p>${j.duration}. ${fromPrice(j)} per person — no ceiling; we reshape to your budget. Place withheld until forty-eight hours before you fly. You asked for ${answers.element}, ${answers.pace} days, travelling as ${answers.who === "two" ? "two" : "a few"}.</p>
           <div class="btn-row" style="margin-top:28px">
             <a class="btn btn-light" href="book.html?id=${j.id}">Hold the envelope</a>
-            <a class="btn btn-ghost" href="journey.html?id=${j.id}">Read the terms</a>
+            <a class="btn btn-ghost" href="${tripHref(j.id)}">Read the terms</a>
           </div>`;
         env.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
@@ -774,7 +815,6 @@
     }
 
     const col = colOf(j);
-    document.title = `${j.title} · ${j.country} — Loop Trips`;
 
     const heroBg = $("#hero-bg");
     if (heroBg && j.image) {
@@ -853,6 +893,10 @@
     $("#related").innerHTML = (related.length ? related : LOOP.journeys.filter((x) => x.collection !== "world").slice(0, 3))
       .map(card)
       .join("");
+
+    if (window.LOOP_SEO && typeof window.LOOP_SEO.applyTrip === "function") {
+      window.LOOP_SEO.applyTrip(j, col);
+    }
   }
 
   function renderBook() {
@@ -1230,6 +1274,126 @@
     }
   }
 
+  function saveAffiliateApps(list) {
+    localStorage.setItem("loop_affiliate_apps", JSON.stringify(list));
+  }
+
+  function loadAffiliateApps() {
+    try {
+      return JSON.parse(localStorage.getItem("loop_affiliate_apps") || "[]");
+    } catch {
+      return [];
+    }
+  }
+
+  function renderAffiliates() {
+    const waHref = waBookingLink("Hi Loop Trips! I want to apply for the affiliate programme (10% commission).");
+    ["affiliate-wa", "affiliate-done-wa"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.href = waHref;
+    });
+
+    const form = $("#affiliate-form");
+    if (!form) return;
+
+    const setErr = (el, msg) => {
+      el.classList.toggle("invalid", !!msg);
+      let tip = el.parentElement.querySelector(".field-error");
+      if (!tip) {
+        tip = document.createElement("p");
+        tip.className = "field-error";
+        el.parentElement.appendChild(tip);
+      }
+      tip.textContent = msg || "";
+    };
+
+    ["a-name", "a-email", "a-phone", "a-channel", "a-method"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("input", () => setErr(el, ""));
+      if (el) el.addEventListener("change", () => setErr(el, ""));
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = $("#a-name");
+      const email = $("#a-email");
+      const phone = $("#a-phone");
+      const channel = $("#a-channel");
+      const method = $("#a-method");
+      const url = $("#a-url");
+      const city = $("#a-city");
+      const audience = $("#a-audience");
+
+      let ok = true;
+      if (!name.value.trim()) {
+        setErr(name, "Name is required.");
+        ok = false;
+      } else setErr(name, "");
+      if (!email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+        setErr(email, "Enter a valid email.");
+        ok = false;
+      } else setErr(email, "");
+      if (!phone.value.trim() || phone.value.trim().replace(/\D/g, "").length < 10) {
+        setErr(phone, "Enter a valid phone / WhatsApp number.");
+        ok = false;
+      } else setErr(phone, "");
+      if (!channel.value) {
+        setErr(channel, "Select how you work.");
+        ok = false;
+      } else setErr(channel, "");
+      if (!method.value.trim() || method.value.trim().length < 20) {
+        setErr(method, "Describe your methodology in a few sentences.");
+        ok = false;
+      } else setErr(method, "");
+      if (!ok) return;
+
+      const ref = "AFF-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+      const app = {
+        ref,
+        name: name.value.trim(),
+        email: email.value.trim(),
+        phone: phone.value.trim(),
+        channel: channel.value,
+        url: url.value.trim(),
+        city: city.value.trim(),
+        audience: audience.value.trim(),
+        methodology: method.value.trim(),
+        commission: "10%",
+        created: new Date().toISOString(),
+      };
+      const all = loadAffiliateApps();
+      all.unshift(app);
+      saveAffiliateApps(all);
+
+      const waMsg = [
+        `Hi Loop Trips — affiliate application (ref ${ref})`,
+        "",
+        `Name: ${app.name}`,
+        `Email: ${app.email}`,
+        `Phone: ${app.phone}`,
+        `Channel: ${app.channel}`,
+        app.city ? `City: ${app.city}` : "",
+        app.url ? `URL: ${app.url}` : "",
+        app.audience ? `Audience: ${app.audience}` : "",
+        "Commission: 10%",
+        "",
+        "Methodology:",
+        app.methodology,
+      ]
+        .filter((line, i, arr) => line || (i > 0 && arr[i - 1]))
+        .join("\n");
+      const appWa = waBookingLink(waMsg);
+      window.open(appWa, "_blank", "noopener");
+
+      const doneWa = $("#affiliate-done-wa");
+      if (doneWa) doneWa.href = appWa;
+      const refEl = $("#affiliate-ref");
+      if (refEl) refEl.textContent = ref;
+      form.hidden = true;
+      $("#affiliate-done").hidden = false;
+    });
+  }
+
   mountChrome();
   const page = document.body.dataset.page;
   if (page === "home") renderHome();
@@ -1240,4 +1404,5 @@
   if (page === "bookings") renderBookings();
   if (page === "contact") renderContact();
   if (page === "about") renderAbout();
+  if (page === "affiliates") renderAffiliates();
 })();

@@ -5,7 +5,7 @@
  */
 (function () {
   const KEY = "loop_cms";
-  const PROFILE_VERSION = 3;
+  const PROFILE_VERSION = 4;
 
   /** Canonical desk profile — wins over stale CMS brand contact fields on migrate. */
   const PROFILE = {
@@ -18,8 +18,8 @@
     addressFull: "Hitech City, Madhapur, Hyderabad, Telangana 500081",
     instagram: "https://instagram.com/LOOPTRIPS.IN",
     instagramHandle: "@LOOPTRIPS.IN",
-    logoMark: "Desh pehle · Duniya tak",
-    tagline: "Desh pehle. Phir jahaan dil jaaye.",
+    logoMark: "Bharat first · World beyond",
+    tagline: "Bharat at the heart of every journey.",
     hours: "10:00–18:00 IST",
     license: "",
     iata: "",
@@ -165,6 +165,21 @@
 
     if (!cms.trust) {
       cms.trust = clone(LOOP.trust || {});
+      changed = true;
+    } else if (!(cms.trust.tripsBooked || "").trim() || !(cms.trust.iataNote || "").trim()) {
+      /* Soft trust proof from seed — never invent rating / trip counts. */
+      const seed = LOOP.trust || {};
+      const t = cms.trust;
+      cms.trust = {
+        ...clone(seed),
+        ...t,
+        label: (t.label || "").trim() || seed.label,
+        licenseNote: (t.licenseNote || "").trim() || seed.licenseNote,
+        tripsBooked: (t.tripsBooked || "").trim() || seed.tripsBooked,
+        tripsLabel: (t.tripsLabel || "").trim() || seed.tripsLabel || "",
+        iataNote: (t.iataNote || "").trim() || seed.iataNote || "",
+        rating: (t.rating || "").trim(),
+      };
       changed = true;
     }
 
