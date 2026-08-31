@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Book a trip — Loop Trips</title>
-  <meta name="description" content="Demo booking for Loop Trips. No payment is taken.">
+  <title>Request a trip — Loop Trips</title>
+  <meta name="description" content="Request a trip with Loop Trips. No payment on this site — the desk confirms personally.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
@@ -16,8 +16,8 @@
     <img class="bg" src="https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=2000&q=80" alt="Jaipur palace courtyard">
     <div class="wrap">
       <p class="eyebrow">Booking</p>
-      <h1>Book a trip.</h1>
-      <p>Three steps: pick the trip, add guest details, confirm — or skip the form and WhatsApp the desk. This is a demo — you get a Loop reference, no card is charged.</p>
+      <h1>Request a trip.</h1>
+      <p>Three steps: pick the trip, add guest details, send your request — or skip the form and WhatsApp the desk directly. No payment on this site; our travel desk confirms every itinerary personally.</p>
     </div>
   </div>
 
@@ -84,8 +84,8 @@
 
           <div data-step-panel="3" hidden>
             <p class="eyebrow">Review</p>
-            <h2 style="font-size:2.6rem;margin:8px 0 16px">Nothing is charged.</h2>
-            <p style="color:var(--mute);max-width:46ch">Confirm to issue a demo reference. Check Your hold for trip, price, and guests. You can release it later from My bookings. See <a href="cancellation.html">cancellation</a> and <a href="refund.html">refund</a> policies.</p>
+            <h2 style="font-size:2.6rem;margin:8px 0 16px">Ready to send.</h2>
+            <p style="color:var(--mute);max-width:46ch">Confirm to send your trip request to the desk on WhatsApp. You will receive a Loop reference for your records. The desk reviews every itinerary before booking. See <a href="cancellation.html">cancellation</a> and <a href="refund.html">refund</a> policies.</p>
           </div>
 
           <div class="btn-row" style="margin-top:36px">
@@ -101,18 +101,18 @@
           <h3 id="sum-title"></h3>
           <div id="sum-body"></div>
           <div class="total" id="sum-total"></div>
-          <p style="opacity:.5;margin-top:8px;font-size:.78rem">Estimated total · demo</p>
+          <p style="opacity:.5;margin-top:8px;font-size:.78rem">Estimated total · indicative</p>
           <a class="btn btn-dark wa-btn" id="sum-wa" href="https://wa.me/919951139299" target="_blank" rel="noopener" style="margin-top:18px;width:100%;justify-content:center">Book on WhatsApp</a>
         </aside>
       </div>
 
       <div id="confirm" class="confirm-box" hidden>
-        <p class="eyebrow">Held</p>
-        <h2>Your journey is reserved.</h2>
+        <p class="eyebrow">Sent</p>
+        <h2>Your trip request is ready.</h2>
         <p id="confirm-copy" style="color:var(--mute)"></p>
         <p class="ref" id="ref-code"></p>
         <div class="btn-row" style="justify-content:center">
-          <a class="btn btn-fill" href="bookings.html">View reservations</a>
+          <a class="btn btn-fill" href="bookings.html">View my requests</a>
           <a class="btn btn-dark" id="confirm-wa" href="https://wa.me/919951139299" target="_blank" rel="noopener">WhatsApp the desk</a>
           <a class="btn btn-dark" href="journeys.html">Return to the list</a>
         </div>

@@ -927,23 +927,38 @@ section {
 
 .region-list {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(48px, 10vw, 140px);
+  row-gap: 0;
   border-top: 1px solid var(--line);
 }
 
 .region-list a {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: baseline;
-  padding: 20px 4px;
+  gap: 20px;
+  padding: 20px 0;
   border-bottom: 1px solid var(--line);
   font-size: 1.2rem;
   font-family: var(--serif);
+  min-width: 0;
+}
+
+.region-list a:nth-child(odd) {
+  padding-right: clamp(8px, 2vw, 24px);
+}
+
+.region-list a:nth-child(even) {
+  padding-left: clamp(8px, 2vw, 24px);
 }
 
 .region-list a:hover {
   color: var(--accent);
+}
+
+.region-list a span {
+  min-width: 0;
 }
 
 .region-list em {
@@ -951,6 +966,8 @@ section {
   font-family: var(--sans);
   font-size: 0.88rem;
   color: var(--mute);
+  white-space: nowrap;
+  text-align: right;
 }
 
 .regions {
@@ -2100,6 +2117,12 @@ body.nav-open {
   .chapter,
   .chapter.flip {
     grid-template-columns: 1fr;
+  }
+
+  .region-list a:nth-child(odd),
+  .region-list a:nth-child(even) {
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .chapter,

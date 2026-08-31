@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in — Loop Trips</title>
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="googlebot" content="noindex,nofollow,noarchive">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <div class="admin-login">
+    <form class="login-card" id="gate-form">
+      <p class="eyebrow" style="margin:0;letter-spacing:.08em;text-transform:uppercase;font-size:.75rem;color:#6b6560">Loop Trips · Private</p>
+      <h1>Admin</h1>
+      <p>Private desk for packages and site content. Sign in to continue.</p>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" required autofocus>
+      </div>
+      <button class="btn btn-accent" type="submit" style="width:100%">Enter</button>
+      <p id="gate-error" style="color:#a33b2b;font-size:.9rem;margin:10px 0 0" hidden></p>
+    </form>
+  </div>
+  <script>
+    (function () {
+      const form = document.getElementById("gate-form");
+      const err = document.getElementById("gate-error");
+      const params = new URLSearchParams(location.search);
+      const next = params.get("next") || "/admin";
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        err.hidden = true;
+        const btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = "Checking…";
+        try {
+          const res = await fetch("/api/admin-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "same-origin",
+            body: JSON.stringify({ password: document.getElementById("password").value }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || "Sign-in failed");
+          location.replace(next.startsWith("/") ? next : "/admin");
+        } catch (ex) {
+          err.textContent = ex.message || "Sign-in failed";
+          err.hidden = false;
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Enter";
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

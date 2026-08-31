@@ -2,12 +2,6 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
-  const AUTH_KEY = "loop_cms_pass_hash";
-  const SESSION_KEY = "loop_admin_ok";
-  const DEFAULT_PASSWORD = "loopadmin";
-  /** Precomputed SHA-256 of "loopadmin" — used if Web Crypto is slow/unavailable to seed. */
-  const DEFAULT_HASH = "3f89251827d07c2f9ea93e81379c73b7861ab6cf58495d4dbe98ed883005bdc1";
-
   const REGIONS = ["India", "Europe", "Africa", "Asia", "Islands", "Middle East", "Oceania"];
   const STATUSES = ["Open", "Limited", "Seasonal", "Closed"];
   const COLLECTIONS = ["world", "sanatan", "biker", "community", "solo", "surprise", "group"];
@@ -18,32 +12,6 @@
     filter: { q: "", region: "", collection: "" },
     cms: null,
   };
-
-  async function sha256(text) {
-    if (!window.crypto || !crypto.subtle) {
-      throw new Error("This browser cannot hash passwords. Use Chrome / Edge / Firefox on HTTPS.");
-    }
-    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-    return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
-  }
-
-  async function ensureDefaultHash() {
-    try {
-      if (!localStorage.getItem(AUTH_KEY)) {
-        localStorage.setItem(AUTH_KEY, DEFAULT_HASH);
-      }
-    } catch {
-      /* private mode — still allow login against DEFAULT_HASH */
-    }
-  }
-
-  function storedHash() {
-    try {
-      return localStorage.getItem(AUTH_KEY) || DEFAULT_HASH;
-    } catch {
-      return DEFAULT_HASH;
-    }
-  }
 
   function toast(msg, err) {
     const el = $("#toast");
@@ -163,54 +131,13 @@
     };
   }
 
-  /* ——— Auth ——— */
-  async function login(password) {
-    await ensureDefaultHash();
-    const attempt = String(password || "").trim();
-    if (!attempt) throw new Error("Enter the password");
-    const hash = await sha256(attempt);
-    const stored = storedHash();
-    /* Accept the saved password, or the factory password if the gate was corrupted. */
-    const ok = hash === stored || hash === DEFAULT_HASH;
-    if (!ok) throw new Error("Wrong password. Use loopadmin, or tap Reset gate below.");
-    if (hash === DEFAULT_HASH && stored !== DEFAULT_HASH) {
-      try {
-        localStorage.setItem(AUTH_KEY, DEFAULT_HASH);
-      } catch {
-        /* ignore */
-      }
-    }
-    sessionStorage.setItem(SESSION_KEY, "1");
-  }
-
-  function logout() {
-    sessionStorage.removeItem(SESSION_KEY);
-    location.reload();
-  }
-
-  function isAuthed() {
-    return sessionStorage.getItem(SESSION_KEY) === "1";
-  }
-
-  function resetGate() {
+  async function logout() {
     try {
-      localStorage.setItem(AUTH_KEY, DEFAULT_HASH);
+      await fetch("/api/admin-logout", { method: "POST", credentials: "same-origin" });
     } catch {
-      /* ignore */
+      /* still redirect */
     }
-    sessionStorage.removeItem(SESSION_KEY);
-    toast("Gate reset — password is loopadmin");
-    const err = $("#login-error");
-    if (err) {
-      err.textContent = "Password reset to loopadmin. Enter it above.";
-      err.hidden = false;
-      err.style.color = "#2f6b4f";
-    }
-    const input = $("#password");
-    if (input) {
-      input.value = "";
-      input.focus();
-    }
+    location.replace("/admin-gate.html");
   }
 
   function bindChrome() {
@@ -221,11 +148,7 @@
     if (logoutBtn) logoutBtn.onclick = logout;
   }
 
-  function enterApp() {
-    const loginView = $("#login-view");
-    const appView = $("#app-view");
-    if (loginView) loginView.hidden = true;
-    if (appView) appView.hidden = false;
+  function boot() {
     ensureCms();
     bindChrome();
     render();
@@ -797,22 +720,12 @@
       <div class="admin-top">
         <div>
           <h2>Settings</h2>
-          <p>Password, export / import, reset. Last save: ${escapeHtml(updated)}</p>
+          <p>Export / import, reset. Last save: ${escapeHtml(updated)}</p>
         </div>
       </div>
       <div class="card">
-        <h3 style="margin-top:0;font-family:var(--serif);font-weight:500">Change password</h3>
-        <div class="grid-form">
-          <div class="field">
-            <label>Current password</label>
-            <input id="pw-current" type="password">
-          </div>
-          <div class="field">
-            <label>New password</label>
-            <input id="pw-new" type="password">
-          </div>
-        </div>
-        <button class="btn btn-dark" type="button" id="pw-save">Update password</button>
+        <h3 style="margin-top:0;font-family:var(--serif);font-weight:500">Access</h3>
+        <p style="color:var(--admin-mute);margin:0;line-height:1.55">Admin sign-in is enforced on the server (Vercel). The password is stored only in your Vercel project environment — not in this page or in the browser. Change it in the Vercel dashboard under <strong>Settings → Environment Variables</strong> (<code>ADMIN_PASSWORD</code>).</p>
       </div>
       <div class="card">
         <h3 style="margin-top:0;font-family:var(--serif);font-weight:500">Backup</h3>
@@ -838,7 +751,7 @@
       </div>
       <div class="card going-live">
         <ol>
-          <li>Open <a href="https://loop-trips.vercel.app/admin" target="_blank" rel="noopener">loop-trips.vercel.app/admin</a> — bookmark it. It is <strong>not</strong> linked in the public menu. Password: <code>loopadmin</code>.</li>
+          <li>Bookmark your admin URL (e.g. <code>/admin</code> on your domain). It is <strong>not</strong> linked from the public menu. You will be asked to sign in; only your Vercel admin password works.</li>
           <li><strong>Packages</strong> — Add, edit, duplicate, or delete trips (price, cities, itinerary, images).</li>
           <li><strong>Collections</strong> — Edit Sanatan, Biker, Community, Solo, Surprise, Group copy and hero images.</li>
           <li><strong>Brand</strong> — WhatsApp, Hyderabad address, Instagram, tagline. Use “Apply profile defaults” if an old number reappears.</li>
@@ -984,27 +897,6 @@
     }
 
     if (state.view === "settings") {
-      $("#pw-save").onclick = async () => {
-        try {
-          const cur = $("#pw-current").value;
-          const next = $("#pw-new").value;
-          if (!next || next.length < 6) {
-            toast("New password must be at least 6 characters", true);
-            return;
-          }
-          const hash = await sha256(cur);
-          if (hash !== localStorage.getItem(AUTH_KEY)) {
-            toast("Current password is wrong", true);
-            return;
-          }
-          localStorage.setItem(AUTH_KEY, await sha256(next));
-          $("#pw-current").value = "";
-          $("#pw-new").value = "";
-          toast("Password updated");
-        } catch (e) {
-          toast(e.message || "Could not update password", true);
-        }
-      };
       $("#btn-export").onclick = exportJson;
       $("#btn-import").onchange = (e) => importJson(e.target.files[0]);
       $("#btn-reset").onclick = () => {
@@ -1061,88 +953,9 @@
     return escapeHtml(s).replace(/'/g, "&#39;");
   }
 
-  /* ——— Boot ——— */
-  async function boot() {
-    const loginView = $("#login-view");
-    const appView = $("#app-view");
-    const err = $("#login-error");
-
-    try {
-      await ensureDefaultHash();
-    } catch (e) {
-      if (loginView) loginView.hidden = false;
-      if (appView) appView.hidden = true;
-      if (err) {
-        err.textContent = e.message || "Could not start admin gate.";
-        err.hidden = false;
-      }
-    }
-
-    const resetBtn = $("#reset-gate");
-    if (resetBtn) {
-      resetBtn.onclick = () => {
-        if (confirm("Reset the admin password to the factory default (loopadmin)?")) {
-          resetGate();
-        }
-      };
-    }
-
-    if (!isAuthed()) {
-      if (loginView) loginView.hidden = false;
-      if (appView) appView.hidden = true;
-      $("#login-form").onsubmit = async (e) => {
-        e.preventDefault();
-        if (err) {
-          err.hidden = true;
-          err.style.color = "#a33b2b";
-        }
-        const btn = e.target.querySelector('button[type="submit"]');
-        if (btn) {
-          btn.disabled = true;
-          btn.textContent = "Checking…";
-        }
-        try {
-          await login($("#password").value);
-          enterApp();
-        } catch (ex) {
-          if (err) {
-            err.textContent = ex.message || "Login failed";
-            err.hidden = false;
-          }
-        } finally {
-          if (btn) {
-            btn.disabled = false;
-            btn.textContent = "Enter";
-          }
-        }
-      };
-      return;
-    }
-
-    enterApp();
-  }
-
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => {
-      boot().catch((e) => {
-        const err = $("#login-error");
-        const loginView = $("#login-view");
-        if (loginView) loginView.hidden = false;
-        if (err) {
-          err.textContent = e.message || "Admin failed to start. Hard-refresh and try again.";
-          err.hidden = false;
-        }
-      });
-    });
+    document.addEventListener("DOMContentLoaded", boot);
   } else {
-    boot().catch((e) => {
-      const err = $("#login-error");
-      const loginView = $("#login-view");
-      if (loginView) loginView.hidden = false;
-      if (err) {
-        err.textContent = e.message || "Admin failed to start. Hard-refresh and try again.";
-        err.hidden = false;
-      }
-    });
+    boot();
   }
 })();

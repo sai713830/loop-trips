@@ -34,6 +34,18 @@
     return `${base}?text=${encodeURIComponent(message)}`;
   }
 
+  function waEnquiryMessage(overrides = {}) {
+    const lines = [
+      "Hi Loop Trips! I want to plan a trip.",
+      overrides.destination ? `Destination: ${overrides.destination}` : "Destination:",
+      overrides.dates ? `Dates: ${overrides.dates}` : "Dates:",
+      overrides.travellers ? `Travellers: ${overrides.travellers}` : "Travellers:",
+      overrides.budget ? `Budget: ${overrides.budget}` : "Budget:",
+    ];
+    if (overrides.extra) lines.push("", overrides.extra);
+    return lines.join("\n");
+  }
+
   const kolamSvg = `<svg viewBox="0 0 80 80" fill="none" aria-hidden="true">
     <circle cx="40" cy="40" r="2.4" fill="currentColor"/>
     <circle cx="40" cy="14" r="1.8" fill="currentColor"/>
@@ -83,11 +95,11 @@
             <button type="button" class="currency-btn${cur === "INR" ? " on" : ""}" data-currency="INR" aria-pressed="${cur === "INR"}">₹ INR</button>
             <button type="button" class="currency-btn${cur === "USD" ? " on" : ""}" data-currency="USD" aria-pressed="${cur === "USD"}">$ USD</button>
           </div>
-          <a class="nav-phone" href="${b.whatsappLink || "https://wa.me/919951139299"}" target="_blank" rel="noopener">
+          <a class="nav-phone" href="${waBookingLink(waEnquiryMessage())}" target="_blank" rel="noopener">
             <span class="nav-phone-label">WhatsApp</span>
             <span class="nav-phone-num">${b.whatsapp || b.phone || "+91 99511 39299"}</span>
           </a>
-          <a class="book-link" href="book.html">Plan a trip</a>
+          <a class="book-link" href="book.html">Request a trip</a>
         </div>
       </nav>
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
@@ -114,7 +126,7 @@
           </div>
           <div class="foot-cta-actions">
             <a class="btn btn-light" href="concierge.html">Open the concierge</a>
-            <a class="btn btn-ghost" href="${b.whatsappLink || "contact.html"}" target="_blank" rel="noopener">WhatsApp</a>
+            <a class="btn btn-ghost" href="${waBookingLink(waEnquiryMessage())}" target="_blank" rel="noopener">WhatsApp</a>
             <a class="btn btn-ghost" href="contact.html">Write to us</a>
           </div>
         </div>
@@ -133,7 +145,7 @@
             <a href="index.html#india">India packages</a>
             <a href="community.html">Community</a>
             <a href="index.html#world">The world</a>
-            <a href="book.html">Plan a trip</a>
+            <a href="book.html">Request a trip</a>
             <a href="bookings.html">My bookings</a>
           </div>
           <div class="foot-col">
@@ -143,7 +155,7 @@
           <div class="foot-col">
             <p class="eyebrow">Desk</p>
             <a href="mailto:${b.email || "concierge@looptrips.com"}">${b.email || "concierge@looptrips.com"}</a>
-            <a href="${b.whatsappLink || "https://wa.me/919951139299"}" target="_blank" rel="noopener">WhatsApp ${b.whatsapp || b.phone || "+91 99511 39299"}</a>
+            <a href="${waBookingLink(waEnquiryMessage())}" target="_blank" rel="noopener">WhatsApp ${b.whatsapp || b.phone || "+91 99511 39299"}</a>
             <a href="tel:${b.phoneTel || "+919951139299"}">Call ${b.phone || "+91 99511 39299"}</a>
             <a href="about.html">About</a>
             <a href="contact.html">Contact</a>
@@ -151,6 +163,7 @@
           </div>
           <div class="foot-col">
             <p class="eyebrow">Policies</p>
+            <a href="privacy.html">Privacy policy</a>
             <a href="cancellation.html">Cancellation policy</a>
             <a href="refund.html">Refund policy</a>
             <a href="terms.html">Terms &amp; conditions</a>
@@ -826,7 +839,12 @@
     if (ask) ask.href = `concierge.html?about=${j.id}&q=${encodeURIComponent("Customise " + j.title + " to my budget")}`;
     const tripWa = $("#book-wa-trip");
     if (tripWa) {
-      tripWa.href = waBookingLink(`Hi Loop Trips — I'd like to book ${j.title} (${fromPrice(j)}).`);
+      tripWa.href = waBookingLink(
+        waEnquiryMessage({
+          destination: `${j.title} (${j.country})`,
+          budget: fromPrice(j),
+        })
+      );
     }
 
     const related = LOOP.journeys
@@ -847,8 +865,12 @@
     function syncWhatsAppLinks() {
       const j = getJourney(select.value);
       const msg = j
-        ? `Hi Loop Trips — I'd like to book ${j.title} (${fromPrice(j)}).`
-        : "Hi Loop Trips — I'd like to book a trip.";
+        ? waEnquiryMessage({
+            destination: `${j.title} (${j.country})`,
+            budget: fromPrice(j),
+            extra: "Notes:",
+          })
+        : waEnquiryMessage();
       const href = waBookingLink(msg);
       ["book-wa", "sum-wa", "confirm-wa"].forEach((id) => {
         const el = document.getElementById(id);
@@ -996,7 +1018,7 @@
       });
       $$(".steps span").forEach((s, i) => s.classList.toggle("on", i < step));
       $("#back-btn").hidden = step === 1;
-      $("#next-btn").textContent = step === 3 ? "Confirm reservation" : "Continue";
+      $("#next-btn").textContent = step === 3 ? "Send trip request" : "Continue";
     };
 
     $("#next-btn").addEventListener("click", () => {
@@ -1077,16 +1099,30 @@
       all.unshift(booking);
       saveBookings(all);
 
+      const waMsg = [
+        `Hi Loop Trips — trip request (ref ${ref})`,
+        `Trip: ${s.j.title} (${s.j.country})`,
+        `Dates: ${s.start}`,
+        `Travellers: ${s.guests}`,
+        `Suite: ${s.suite.name}`,
+        s.addons.length ? `Additions: ${s.addons.map((a) => a.name).join(", ")}` : "",
+        `Estimated total: ${money(s.total)}`,
+        `Name: ${booking.name}`,
+        `Email: ${booking.email}`,
+        `Phone: ${booking.phone}`,
+        booking.notes ? `Notes: ${booking.notes}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n");
+      const waHref = waBookingLink(waMsg);
+
       $("#wizard").hidden = true;
       $("#confirm").hidden = false;
       $("#ref-code").textContent = ref;
-      $("#confirm-copy").textContent = `${s.j.title} · ${s.guests} guest${s.guests > 1 ? "s" : ""} · departing ${s.start} · ${money(s.total)}`;
+      $("#confirm-copy").textContent = `${s.j.title} · ${s.guests} guest${s.guests > 1 ? "s" : ""} · departing ${s.start} · ${money(s.total)}. Send this request on WhatsApp so the desk can confirm your itinerary.`;
       const confirmWa = $("#confirm-wa");
-      if (confirmWa) {
-        confirmWa.href = waBookingLink(
-          `Hi Loop Trips — I held ${s.j.title} (ref ${ref}). Guests: ${s.guests}, departing ${s.start}.`
-        );
-      }
+      if (confirmWa) confirmWa.href = waHref;
+      window.open(waHref, "_blank", "noopener");
     }
 
     syncGuests();
@@ -1098,7 +1134,7 @@
     const list = loadBookings();
     const box = $("#booking-list");
     if (!list.length) {
-      box.innerHTML = `<p class="empty">No reservations yet. This is a demo — book a journey to see it appear here.</p>`;
+      box.innerHTML = `<p class="empty">No trip requests yet. <a href="book.html">Request a journey</a> or <a href="${waBookingLink(waEnquiryMessage())}" target="_blank" rel="noopener">WhatsApp the desk</a>.</p>`;
       return;
     }
     box.innerHTML = list
@@ -1143,11 +1179,11 @@
           ${b.license ? `<li><span>License</span><span>${b.license}</span></li>` : ""}
           ${b.iata ? `<li><span>IATA</span><span>${b.iata}</span></li>` : ""}
         </ul>
-        <a class="btn btn-fill wa-btn" href="${b.whatsappLink}" target="_blank" rel="noopener">WhatsApp the desk</a>
-        <p class="contact-note">Book via the form, or WhatsApp us on ${b.whatsapp || b.phone}. Prefer a hold online? Use <a href="book.html">Plan a trip</a>.</p>
+        <a class="btn btn-fill wa-btn" href="${waBookingLink(waEnquiryMessage())}" target="_blank" rel="noopener">WhatsApp the desk</a>
+        <p class="contact-note">Message us on WhatsApp for the fastest reply, or <a href="book.html">request a trip</a> with dates and budget.</p>
       `;
     }
-    const waHref = b.whatsappLink || "https://wa.me/919951139299";
+    const waHref = waBookingLink(waEnquiryMessage());
     ["contact-wa", "contact-done-wa"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.href = waHref;
@@ -1158,6 +1194,7 @@
         e.preventDefault();
         const name = $("#c-name");
         const email = $("#c-email");
+        const about = $("#c-about");
         const msg = $("#c-msg");
         let ok = true;
         [["c-name", name, "Name is required."], ["c-email", email, "Valid email is required."], ["c-msg", msg, "Please write a short message."]].forEach(([, el, text]) => {
@@ -1173,6 +1210,20 @@
           if (bad) ok = false;
         });
         if (!ok) return;
+        const waMsg = [
+          "Hi Loop Trips!",
+          `Name: ${name.value.trim()}`,
+          `Email: ${email.value.trim()}`,
+          about.value.trim() ? `Trip style: ${about.value.trim()}` : "",
+          "",
+          msg.value.trim(),
+        ]
+          .filter((line, i, arr) => line || (i > 0 && arr[i - 1]))
+          .join("\n");
+        const contactWa = waBookingLink(waMsg);
+        window.open(contactWa, "_blank", "noopener");
+        const doneWa = $("#contact-done-wa");
+        if (doneWa) doneWa.href = contactWa;
         form.hidden = true;
         $("#contact-done").hidden = false;
       });
