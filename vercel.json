@@ -5,13 +5,7 @@
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "loop-trips.vercel.app" }],
-      "destination": "https://looptrips.in/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "www.looptrips.in" }],
-      "destination": "https://looptrips.in/:path*",
+      "destination": "https://www.looptrips.in/:path*",
       "permanent": true
     }
   ],

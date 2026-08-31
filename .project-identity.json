@@ -19,8 +19,8 @@
     "account": "looptripsindia-7149",
     "team_scope": "loop-trips",
     "project": "loop-trips",
-    "canonical_origin": "https://looptrips.in",
-    "production_url": "https://loop-trips.vercel.app",
+    "canonical_origin": "https://www.looptrips.in",
+    "production_url": "https://www.looptrips.in",
     "auth": "Use .env.local VERCEL_TOKEN only. Do not vercel login globally for this project."
   }
 }
