@@ -56,6 +56,34 @@
     Paris: { lat: 48.86, lng: 2.35 },
     Sydney: { lat: -33.87, lng: 151.21 },
     Kathmandu: { lat: 27.72, lng: 85.32 },
+    Kazakhstan: { lat: 43.24, lng: 76.95 },
+    Uzbekistan: { lat: 41.31, lng: 69.28 },
+    Georgia: { lat: 41.72, lng: 44.78 },
+    Azerbaijan: { lat: 40.41, lng: 49.87 },
+    Armenia: { lat: 40.18, lng: 44.51 },
+    Kyrgyzstan: { lat: 42.87, lng: 74.59 },
+    Tajikistan: { lat: 38.56, lng: 68.78 },
+    Mongolia: { lat: 47.92, lng: 106.91 },
+    Vietnam: { lat: 21.03, lng: 105.85 },
+    Cambodia: { lat: 11.56, lng: 104.92 },
+    "Sri Lanka": { lat: 7.87, lng: 80.77 },
+    Oman: { lat: 23.59, lng: 58.38 },
+    Jordan: { lat: 31.95, lng: 35.93 },
+    Morocco: { lat: 31.63, lng: -7.99 },
+    Turkmenistan: { lat: 37.96, lng: 58.38 },
+    Romania: { lat: 44.43, lng: 26.1 },
+    "Azerbaijan & Georgia": { lat: 41.72, lng: 44.78 },
+    "Uzbekistan & Kazakhstan": { lat: 41.31, lng: 69.28 },
+    "Georgia & Armenia": { lat: 41.72, lng: 44.78 },
+    "Azerbaijan, Georgia & Armenia": { lat: 40.41, lng: 49.87 },
+    Tanzania: { lat: -6.16, lng: 35.75 },
+    Namibia: { lat: -22.57, lng: 17.08 },
+    USA: { lat: 40.71, lng: -74.01 },
+    Canada: { lat: 51.05, lng: -114.07 },
+    Brazil: { lat: -22.91, lng: -43.17 },
+    Peru: { lat: -13.16, lng: -72.54 },
+    Australia: { lat: -33.87, lng: 151.21 },
+    Russia: { lat: 55.76, lng: 37.62 },
   };
 
   const LOCATION_GEO = {
@@ -80,6 +108,33 @@
     Srinagar: GEO.Kashmir,
     Manali: GEO.Manali,
     Coorg: GEO.Coorg,
+    Almaty: GEO.Kazakhstan,
+    Tashkent: GEO.Uzbekistan,
+    Samarkand: { lat: 39.65, lng: 66.96 },
+    Baku: GEO.Azerbaijan,
+    Tbilisi: GEO.Georgia,
+    Yerevan: GEO.Armenia,
+    Bishkek: GEO.Kyrgyzstan,
+    Muscat: GEO.Oman,
+    Amman: GEO.Jordan,
+    Marrakech: GEO.Morocco,
+    Hanoi: GEO.Vietnam,
+    "Siem Reap": GEO.Cambodia,
+    Colombo: GEO["Sri Lanka"],
+    Bucharest: GEO.Romania,
+    Ashgabat: GEO.Turkmenistan,
+    "New York": GEO.USA,
+    Vancouver: GEO.Canada,
+    Banff: { lat: 51.18, lng: -115.57 },
+    "Rio de Janeiro": GEO.Brazil,
+    Cusco: GEO.Peru,
+    Cairns: { lat: -16.92, lng: 145.78 },
+    Moscow: GEO.Russia,
+    "St Petersburg": { lat: 59.93, lng: 30.32 },
+    Arusha: GEO.Tanzania,
+    Zanzibar: { lat: -6.16, lng: 39.2 },
+    Windhoek: GEO.Namibia,
+    Uluru: { lat: -25.34, lng: 131.03 },
   };
 
   let mapInstance = null;
@@ -112,6 +167,7 @@
     const journeys = (window.LOOP?.journeys || []).filter((j) => {
       if (highlightIds.has(j.id)) return true;
       if (j.featured) return true;
+      if (j.region === "Americas" && geoForJourney(j)) return true;
       return false;
     });
 
@@ -119,9 +175,9 @@
     journeys.forEach((j) => {
       const geo = geoForJourney(j);
       if (!geo) return;
-      const key = `${geo.lat.toFixed(1)}:${geo.lng.toFixed(1)}`;
+      const key = j.country || `${geo.lat.toFixed(2)}:${geo.lng.toFixed(2)}`;
       const existing = byKey.get(key);
-      if (!existing || j.featured || highlightIds.has(j.id)) {
+      if (!existing || highlightIds.has(j.id) || j.featured) {
         byKey.set(key, { journey: j, geo, isIndia: j.region === "India" });
       }
     });

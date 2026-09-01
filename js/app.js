@@ -140,7 +140,7 @@
         <div class="foot-top">
           <div class="foot-brand">
             <a class="foot-logo" href="index.html" aria-label="Loop Trips home">${logoImg("foot-logo-img", 68)}</a>
-            <p class="foot-tagline">${b.tagline || "Bharat at the heart of every journey."} India from ₹50,000 — the world from ₹1,00,000. Desk in ${b.city || "Hyderabad"}.</p>
+            <p class="foot-tagline">${b.tagline || "Bharat at the heart of every journey."} India from ₹30,000 — the world from ₹1,00,000. Desk in ${b.city || "Hyderabad"}.</p>
             ${trust.label ? `<p class="foot-trust">${trust.label}</p>` : ""}
             <p class="foot-hours">Open ${b.hours || "10:00–18:00 IST"}${b.license ? ` · ${b.license}` : ""}${b.iata ? ` · ${b.iata}` : ""} · WhatsApp ${b.whatsapp || b.phone || "+91 99511 39299"}</p>
           </div>
@@ -226,7 +226,8 @@
         menuBtn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
       }
     };
-    const onScroll = () => headerEl.classList.toggle("scrolled", window.scrollY > 24);
+    const scrollThreshold = () => (window.matchMedia("(max-width: 980px)").matches ? 56 : 24);
+    const onScroll = () => headerEl.classList.toggle("scrolled", window.scrollY > scrollThreshold());
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
 
@@ -351,7 +352,7 @@
 
     const regions = $("#region-list");
     if (regions) {
-      const order = ["Europe", "Africa", "Asia", "Islands", "Middle East", "Oceania"];
+      const order = ["Europe", "Africa", "Asia", "Americas", "Islands", "Middle East", "Oceania"];
       regions.innerHTML = order
         .map((name) => {
           const n = LOOP.journeys.filter((j) => j.region === name).length;
@@ -577,7 +578,7 @@
               <p>Eight to ten people. One host who lives there. One kitchen that belongs to the place. No coach. No microphone. No forced icebreakers.</p>
             </article>
             <article>
-              <h3>From ₹50,000 — your budget after that</h3>
+              <h3>From ₹30,000 — your budget after that</h3>
               <p>Prices start in the India band. Stay longer, upgrade the house, add a private day — tell us your ceiling and we reshape the week. There is a floor, not a cap.</p>
             </article>
           </div>

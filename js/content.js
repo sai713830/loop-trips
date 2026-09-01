@@ -103,6 +103,19 @@
         "gorgeous-greece",
         "cherry-blossom-country",
         "turkey",
+        "steppe-almaty",
+        "registan-silk",
+        "caucasus-wine",
+        "land-of-fire",
+        "three-pearls",
+        "silk-two-stans",
+        "serengeti-zanzibar",
+        "american-icons",
+        "canadian-rockies",
+        "rio-sambafloor",
+        "inca-heartland",
+        "reef-harbour",
+        "imperial-russia",
       ],
     };
   }
@@ -197,6 +210,28 @@
     }
     if (!cms.home) {
       cms.home = defaultHome();
+      changed = true;
+    } else {
+      const seedHighlights = defaultHome().worldHighlights;
+      const merged = [...new Set([...(cms.home.worldHighlights || []), ...seedHighlights])];
+      if (merged.length !== (cms.home.worldHighlights || []).length) {
+        cms.home.worldHighlights = merged;
+        changed = true;
+      }
+    }
+
+    const seedJourneys = LOOP.journeys || [];
+    if (Array.isArray(cms.journeys) && cms.journeys.length) {
+      const byId = new Map(cms.journeys.map((j) => [j.id, j]));
+      seedJourneys.forEach((j) => {
+        if (!byId.has(j.id)) {
+          byId.set(j.id, clone(j));
+          changed = true;
+        }
+      });
+      if (changed) cms.journeys = [...byId.values()];
+    } else if (seedJourneys.length) {
+      cms.journeys = clone(seedJourneys);
       changed = true;
     }
 

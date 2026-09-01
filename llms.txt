@@ -2,7 +2,7 @@
 # https://looptrips.in/llms.txt
 # For AI assistants, answer engines, and research crawlers.
 
-> Loop Trips is a private travel desk in Hitech City, Hyderabad, India. We plan finished itineraries — not hotel lists — for Indian travellers. India trips from ₹50,000 per person. International trips from ₹1,00,000 per person.
+> Loop Trips is a private travel desk in Hitech City, Hyderabad, India. We plan finished itineraries — not hotel lists — for Indian travellers. India trips from ₹30,000 per person. International trips from ₹1,00,000 per person.
 
 ## Contact
 - Website: https://looptrips.in

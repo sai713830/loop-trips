@@ -137,7 +137,7 @@
       }
 
       if (/cheap|budget trip|affordable/.test(q)) {
-        intent.budgetInr = Math.min(intent.budgetInr || 90000, 90000);
+        intent.budgetInr = Math.min(intent.budgetInr || 50000, 50000);
         intent.currency = "INR";
       }
       if (/luxury|splurge|no budget/.test(q)) {
@@ -168,8 +168,10 @@
       if (/\bindia\b/.test(q)) intent.region = "India";
       if (/\basia\b/.test(q)) intent.region = "Asia";
       if (/island|islands|beach|beaches|maldives|seychelles/.test(q)) intent.regionPref = "Islands";
-      if (/oceania|zealand/.test(q)) intent.region = "Oceania";
+      if (/oceania|zealand|australia/.test(q)) intent.region = "Oceania";
       if (/middle east|dubai/.test(q)) intent.region = "Middle East";
+      if (/america|usa|united states|canada|brazil|peru|south america|north america/.test(q)) intent.region = "Americas";
+      if (/russia|moscow|petersburg/.test(q)) intent.region = "Europe";
 
       if (/sanatan|teerth|yatra|darshan|kashi|char dham|ujjain|dwarka|rameswaram/.test(q))
         intent.collection = "sanatan";

@@ -2,7 +2,7 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
-  const REGIONS = ["India", "Europe", "Africa", "Asia", "Islands", "Middle East", "Oceania"];
+  const REGIONS = ["India", "Europe", "Africa", "Asia", "Islands", "Middle East", "Oceania", "Americas"];
   const STATUSES = ["Open", "Limited", "Seasonal", "Closed"];
   const COLLECTIONS = ["world", "sanatan", "biker", "community", "solo", "surprise", "group"];
 

@@ -17,37 +17,37 @@
     sanatan: {
       title: "Char Dham, Kashi & Temple Yatras from Hyderabad | Sanatan — Loop Trips",
       description:
-        "Sanatan journeys from Loop Trips, Hyderabad. Char Dham, Kashi, Dwarka, Rameswaram, Ujjain — darshan timed, not temple tourism. From ₹50,000.",
+        "Sanatan journeys from Loop Trips, Hyderabad. Char Dham, Kashi, Dwarka, Rameswaram, Ujjain — darshan timed, not temple tourism. From ₹30,000.",
       path: "/sanatan",
     },
     biker: {
       title: "Manali to Leh & Spiti Bike Trips from Hyderabad | Biker — Loop Trips",
       description:
-        "Biker journeys from Loop Trips, Hyderabad. Manali–Leh, Spiti, Western Ghats, Thar — captain, mechanic, support vehicle. From ₹50,000.",
+        "Biker journeys from Loop Trips, Hyderabad. Manali–Leh, Spiti, Western Ghats, Thar — captain, mechanic, support vehicle. From ₹30,000.",
       path: "/biker",
     },
     community: {
       title: "Solo-friendly Community Trips — Coorg, Kutch, Meghalaya | Loop Trips",
       description:
-        "Community circles from Loop Trips. Solo seats at a real table — Coorg, Kutch, Meghalaya. Never more than ten. From ₹50,000 / person.",
+        "Community circles from Loop Trips. Solo seats at a real table — Coorg, Kutch, Meghalaya. Never more than ten. From ₹30,000 / person.",
       path: "/community",
     },
     solo: {
       title: "Solo Travel Packages from Hyderabad — Himachal, Kerala, Gokarna | Loop Trips",
       description:
-        "Solo journeys from Loop Trips, Hyderabad. Himachal, Kerala, Gokarna — single occupancy as default. Private itineraries from ₹50,000.",
+        "Solo journeys from Loop Trips, Hyderabad. Himachal, Kerala, Gokarna — single occupancy as default. Private itineraries from ₹30,000.",
       path: "/solo",
     },
     surprise: {
-      title: "Surprise Destination Trips from Hyderabad — India from ₹50,000 | Loop Trips",
+      title: "Surprise Destination Trips from Hyderabad — India from ₹30,000 | Loop Trips",
       description:
-        "Surprise journeys from Loop Trips, Hyderabad. You pick the month and rooms — the place opens 48 hours before you fly. From ₹50,000.",
+        "Surprise journeys from Loop Trips, Hyderabad. You pick the month and rooms — the place opens 48 hours before you fly. From ₹30,000.",
       path: "/surprise",
     },
     group: {
       title: "Private Group Trips from Hyderabad — 8 to 24 Guests | Loop Trips",
       description:
-        "Group journeys from Loop Trips, Hyderabad. Haveli, Konkan house, Himalayan ridge — one person books, everyone arrives. From ₹50,000.",
+        "Group journeys from Loop Trips, Hyderabad. Haveli, Konkan house, Himalayan ridge — one person books, everyone arrives. From ₹30,000.",
       path: "/group",
     },
   };
