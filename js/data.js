@@ -31,13 +31,12 @@ LOOP.brand = {
 LOOP.trust = {
   /* Leave rating blank until Google / WhatsApp reviews are verified. */
   rating: "",
-  /* Soft proof only — no invented trip counts. */
-  tripsBooked: "India & beyond",
-  tripsLabel: "Private weeks planned",
-  label: "Private trips · India first",
-  licenseNote: "Hyderabad desk · Hitech City",
-  /* Extra home-proof span (optional). */
-  iataNote: "Private weeks · India & beyond",
+  proof: "INDIA • INTERNATIONAL • PRIVATE TRIPS",
+  tripsBooked: "",
+  tripsLabel: "",
+  label: "",
+  licenseNote: "",
+  iataNote: "",
 };
 
 /* Real team bios: Admin → Brand. Empty until real names/photos are ready. */

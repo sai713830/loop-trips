@@ -363,22 +363,26 @@
     const proof = $("#home-proof");
     if (proof) {
       const t = LOOP.trust || {};
-      const b = brand();
-      const softTrips =
-        t.iataNote ||
-        (t.tripsBooked && !/^\d/.test(String(t.tripsBooked).trim())
-          ? String(t.tripsBooked).trim()
-          : t.tripsBooked
-            ? `${t.tripsBooked} trips held`
-            : "");
-      const bits = [
-        t.label || "Private trips · India first",
-        softTrips,
-        t.licenseNote || (b.city ? `${b.city} desk` : ""),
-        b.whatsapp || b.phone ? `WhatsApp ${b.whatsapp || b.phone}` : "",
-        b.instagramHandle || "",
-      ].filter(Boolean);
-      proof.innerHTML = bits.map((s) => `<span>${s}</span>`).join("");
+      if (t.proof) {
+        proof.innerHTML = `<span>${t.proof}</span>`;
+      } else {
+        const b = brand();
+        const softTrips =
+          t.iataNote ||
+          (t.tripsBooked && !/^\d/.test(String(t.tripsBooked).trim())
+            ? String(t.tripsBooked).trim()
+            : t.tripsBooked
+              ? `${t.tripsBooked} trips held`
+              : "");
+        const bits = [
+          t.label || "Private trips · India first",
+          softTrips,
+          t.licenseNote || (b.city ? `${b.city} desk` : ""),
+          b.whatsapp || b.phone ? `WhatsApp ${b.whatsapp || b.phone}` : "",
+          b.instagramHandle || "",
+        ].filter(Boolean);
+        proof.innerHTML = bits.map((s) => `<span>${s}</span>`).join("");
+      }
     }
 
     renderReviews("#reviews-grid");
