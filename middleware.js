@@ -5,13 +5,27 @@ import {
 } from "./lib/admin-session.js";
 
 const GATE = "/admin-gate.html";
+const TRIP_PATH = /^\/trip\/([^/]+)\/?$/;
 
 function isProtected(pathname) {
   return pathname === "/admin" || pathname === "/admin.html" || pathname === "/js/admin.js";
 }
 
+function rewriteTrip(request, id) {
+  const target = new URL(request.url);
+  target.pathname = "/journey";
+  target.search = `?id=${encodeURIComponent(decodeURIComponent(id))}`;
+  return new Response(null, {
+    headers: { "x-middleware-rewrite": target.pathname + target.search },
+  });
+}
+
 export default async function middleware(request) {
   const { pathname } = new URL(request.url);
+
+  const tripMatch = pathname.match(TRIP_PATH);
+  if (tripMatch) return rewriteTrip(request, tripMatch[1]);
+
   if (!isProtected(pathname)) return;
 
   const secret = process.env.ADMIN_SESSION_SECRET;
@@ -32,5 +46,5 @@ export default async function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin.html", "/js/admin.js"],
+  matcher: ["/trip/:path*", "/admin", "/admin.html", "/js/admin.js"],
 };

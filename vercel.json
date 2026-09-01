@@ -12,7 +12,7 @@
   "rewrites": [
     {
       "source": "/trip/:id",
-      "destination": "/journey.html?id=:id"
+      "destination": "/journey?id=:id"
     }
   ],
   "headers": [
