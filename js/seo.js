@@ -6,7 +6,7 @@
   const BRAND = {
     name: "Loop Trips",
     phone: "+91 99511 39299",
-    email: "concierge@looptrips.com",
+    email: "looptripsindia@gmail.com",
     address: "Hitech City, Madhapur, Hyderabad, Telangana 500081",
     city: "Hyderabad",
     instagram: "https://instagram.com/LOOPTRIPS.IN",
@@ -193,8 +193,64 @@
     };
   }
 
+  function founderFromLoop() {
+    const f = global.LOOP && global.LOOP.founder ? global.LOOP.founder : {};
+    const photo = f.photo ? `${ORIGIN}/${String(f.photo).replace(/^\//, "")}` : `${ORIGIN}/img/founder.jpg`;
+    return {
+      name: f.name || "Aditya Vasa",
+      role: f.role || "Founder",
+      photo,
+      url: `${ORIGIN}/about`,
+    };
+  }
+
+  function applyPersonSchema() {
+    const founder = founderFromLoop();
+    setJsonLd("founder", {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "@id": `${ORIGIN}/#founder`,
+      name: founder.name,
+      jobTitle: founder.role,
+      image: founder.photo,
+      url: founder.url,
+      worksFor: { "@id": `${ORIGIN}/#organization` },
+    });
+  }
+
+  function applyReviewSchema() {
+    const reviews = (global.LOOP && global.LOOP.reviews) || [];
+    if (!reviews.length) return;
+    const ratingValue =
+      reviews.reduce((sum, review) => sum + (Number(review.rating) || 5), 0) / reviews.length;
+    setJsonLd("reviews", {
+      "@context": "https://schema.org",
+      "@type": "TravelAgency",
+      "@id": `${ORIGIN}/#travel-agency`,
+      name: brandFromLoop().name,
+      url: ORIGIN,
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: Number(ratingValue.toFixed(1)),
+        reviewCount: reviews.length,
+        bestRating: 5,
+      },
+      review: reviews.map((review) => ({
+        "@type": "Review",
+        author: { "@type": "Person", name: review.name },
+        reviewRating: {
+          "@type": "Rating",
+          ratingValue: review.rating || 5,
+          bestRating: 5,
+        },
+        reviewBody: review.text,
+      })),
+    });
+  }
+
   function applyOrganizationSchema() {
     const b = brandFromLoop();
+    const founder = founderFromLoop();
     setJsonLd("organization", {
       "@context": "https://schema.org",
       "@graph": [
@@ -235,6 +291,15 @@
           name: b.name,
           publisher: { "@id": `${ORIGIN}/#organization` },
           inLanguage: "en-IN",
+        },
+        {
+          "@type": "Person",
+          "@id": `${ORIGIN}/#founder`,
+          name: founder.name,
+          jobTitle: founder.role,
+          image: founder.photo,
+          url: founder.url,
+          worksFor: { "@id": `${ORIGIN}/#organization` },
         },
       ],
     });
@@ -338,6 +403,7 @@
     const image = journey.image || OG_IMAGE;
 
     applyDocumentMeta({ title, description, url, image });
+    upsertMeta('meta[name="author"]', { name: "author", content: founderFromLoop().name });
     applyBreadcrumbs([
       { name: "Home", url: ORIGIN },
       { name: col.name, url: `${ORIGIN}${colPath.startsWith("/") ? colPath : `/${colPath}`}` },
@@ -353,6 +419,8 @@
           name: journey.title,
           description: journey.story || journey.blurb,
           touristType: col.name,
+          provider: { "@id": `${ORIGIN}/#travel-agency` },
+          organizer: { "@id": `${ORIGIN}/#founder` },
           itinerary: {
             "@type": "ItemList",
             itemListElement: (journey.locations || []).map((place, index) => ({
@@ -374,8 +442,22 @@
           seller: { "@id": `${ORIGIN}/#travel-agency` },
           eligibleRegion: { "@type": "Country", name: "India" },
         },
+        {
+          "@type": "WebPage",
+          "@id": `${url}#webpage`,
+          url,
+          name: title,
+          description,
+          isPartOf: { "@id": `${ORIGIN}/#website` },
+          author: { "@id": `${ORIGIN}/#founder` },
+          about: { "@id": `${url}#trip` },
+          inLanguage: "en-IN",
+        },
       ],
     });
+    applyPersonSchema();
+    applyReviewSchema();
+    applyFaqFromDom();
   }
 
   global.LOOP_SEO = {
@@ -395,6 +477,8 @@
     applyCollection,
     applyTrip,
     applyFaqFromDom,
+    applyPersonSchema,
+    applyReviewSchema,
     applyOrganizationSchema,
     formatInr,
   };

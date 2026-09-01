@@ -159,7 +159,7 @@
           </div>
           <div class="foot-col">
             <p class="eyebrow">Desk</p>
-            <a href="mailto:${b.email || "concierge@looptrips.com"}">${b.email || "concierge@looptrips.com"}</a>
+            <a href="mailto:${b.email || "looptripsindia@gmail.com"}">${b.email || "looptripsindia@gmail.com"}</a>
             <a href="${waBookingLink(waEnquiryMessage())}" target="_blank" rel="noopener">WhatsApp ${b.whatsapp || b.phone || "+91 99511 39299"}</a>
             <a href="tel:${b.phoneTel || "+919951139299"}">Call ${b.phone || "+91 99511 39299"}</a>
             <a href="about.html">About</a>
@@ -283,6 +283,54 @@
       return JSON.parse(localStorage.getItem("loop_bookings") || "[]");
     } catch {
       return [];
+    }
+  }
+
+  function saveContactMessages(list) {
+    localStorage.setItem("loop_contact_messages", JSON.stringify(list));
+  }
+
+  function loadContactMessages() {
+    try {
+      return JSON.parse(localStorage.getItem("loop_contact_messages") || "[]");
+    } catch {
+      return [];
+    }
+  }
+
+  async function submitToDesk(type, data) {
+    const to = brand().email || "looptripsindia@gmail.com";
+    const subjects = {
+      booking: `Trip request ${data.ref} — ${data.title}`,
+      contact: `Contact from ${data.name}`,
+      affiliate: `Affiliate application ${data.ref} — ${data.name}`,
+    };
+    const fields = {};
+    Object.entries(data).forEach(([key, val]) => {
+      if (val == null || val === "") return;
+      fields[key] = Array.isArray(val) ? val.join(", ") : String(val);
+    });
+
+    try {
+      const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(to)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          _subject: subjects[type] || `Loop Trips — ${type}`,
+          _template: "table",
+          _captcha: "false",
+          _replyto: data.email || "",
+          form_type: type,
+          ...fields,
+        }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok || body.success === false) {
+        return { ok: false, error: body.message || "Submit failed" };
+      }
+      return { ok: true, ref: data.ref };
+    } catch {
+      return { ok: false, error: "Network error" };
     }
   }
 
@@ -506,7 +554,14 @@
       </div>
 
       <section style="padding-top:0;padding-bottom:0">
-        <div class="wrap qualify">
+        <div class="wrap">
+          <div class="section-head" style="margin-bottom:0;padding-bottom:12px">
+            <div>
+              <p class="eyebrow">Fit</p>
+              <h2>Who this is for</h2>
+            </div>
+          </div>
+          <div class="qualify">
           <article>
             <h3>For</h3>
             <p>${c.forWhom}</p>
@@ -515,6 +570,7 @@
             <h3>Not for</h3>
             <p>${c.notFor}</p>
           </article>
+          </div>
         </div>
       </section>
 
@@ -899,11 +955,74 @@
       .map(card)
       .join("");
 
+    renderTripTrust(j, col);
+    renderTripFaq(j, col);
+
     if (window.LOOP_SEO && typeof window.LOOP_SEO.applyTrip === "function") {
       window.LOOP_SEO.applyTrip(j, col);
     }
 
     bindTripNav();
+  }
+
+  function renderTripTrust(j, col) {
+    const root = $("#d-trust");
+    const f = LOOP.founder;
+    if (!root || !f) return;
+    root.innerHTML = `
+      <div class="founder-copy">
+        <p class="eyebrow">Planned by the desk</p>
+        <h2>Every ${j.title} route is walked before it is written.</h2>
+        <p class="founder-lede">${f.lede || f.tagline || ""}</p>
+        <p>This ${col.name} journey is planned from our Hyderabad desk — route, stays, and the hour each day opens. <a href="about.html">About Loop Trips</a> · <a href="contact.html">Contact the desk</a></p>
+        <div class="founder-sign">
+          <strong>${f.name}</strong>
+          <span>${f.role} · Loop Trips · Hyderabad</span>
+        </div>
+      </div>
+      <figure class="founder-portrait">
+        <img src="${f.photo}" alt="${f.photoAlt}" width="1200" height="1600" loading="lazy">
+      </figure>`;
+  }
+
+  function renderTripFaq(j, col) {
+    const titleEl = $("#d-faq-title");
+    const root = $("#d-faq");
+    if (!titleEl || !root) return;
+
+    const price = fromPrice(j);
+    const placeLine = j.sealed
+      ? "The destination stays sealed until forty-eight hours before you fly."
+      : `${j.country} · ${(j.locations || []).join(" · ")}`;
+    const faqs = [
+      {
+        q: `How do I book ${j.title}?`,
+        a: `Open this page, read the day-by-day plan and from price (${price} per person), then request the trip via the form or WhatsApp. Our Hyderabad desk reviews every request personally. No payment is taken on this website.`,
+      },
+      {
+        q: `What is included in ${j.title}?`,
+        a: `Stays, private transfers, and the experiences listed under “Included in the price” on this page. ${placeLine} International flights to the start city are extra unless noted.`,
+      },
+      {
+        q: `Can I customise ${j.title} to my budget?`,
+        a: `Yes. ${price} is the floor — not a ceiling. Tell the concierge your ceiling and we reshape stays, pace, and days. Classic, Prestige, Royal, or a custom band — the desk holds the week to what you can spend.`,
+      },
+      {
+        q: `When is the best time for ${j.title}?`,
+        a: `Best months on this page: ${j.bestTime}. ${j.duration}. The desk confirms dates and availability for your party before you hold.`,
+      },
+    ];
+
+    titleEl.textContent = `${j.title} — frequently asked`;
+    root.innerHTML = faqs
+      .map(
+        (item, i) => `<article>
+          <span class="n">${i + 1}</span>
+          <h3>${item.q}</h3>
+          <p>${item.a}</p>
+        </article>`
+      )
+      .join("");
   }
 
   function bindTripNav() {
@@ -1135,13 +1254,18 @@
       $$(".steps span").forEach((s, i) => s.classList.toggle("on", i < step));
       $("#back-btn").hidden = step === 1;
       $("#next-btn").textContent = step === 3 ? "Send trip request" : "Continue";
+      const showWa = step >= 3;
+      const bookWa = $("#book-wa");
+      const sumWa = $("#sum-wa");
+      if (bookWa) bookWa.hidden = !showWa;
+      if (sumWa) sumWa.hidden = !showWa;
     };
 
-    $("#next-btn").addEventListener("click", () => {
+    $("#next-btn").addEventListener("click", async () => {
       if (step === 1 && !validateStep1()) return;
       if (step === 2 && !validateStep2()) return;
       if (step === 3) {
-        confirmBooking();
+        await confirmBooking();
         return;
       }
       step += 1;
@@ -1189,7 +1313,7 @@
       }
     }
 
-    function confirmBooking() {
+    async function confirmBooking() {
       const s = state();
       const ref = "LOOP-" + Math.random().toString(36).slice(2, 8).toUpperCase();
       const booking = {
@@ -1206,11 +1330,20 @@
         start: s.start,
         total: s.total,
         name: `${$("#first").value} ${$("#last").value}`.trim(),
-        email: $("#email").value,
-        phone: $("#phone").value,
-        notes: $("#notes").value,
+        email: $("#email").value.trim(),
+        phone: $("#phone").value.trim(),
+        notes: $("#notes").value.trim(),
         created: new Date().toISOString(),
       };
+
+      const nextBtn = $("#next-btn");
+      const prevLabel = nextBtn.textContent;
+      nextBtn.disabled = true;
+      nextBtn.textContent = "Sending…";
+      $("#form-error").textContent = "";
+
+      const result = await submitToDesk("booking", booking);
+
       const all = loadBookings();
       all.unshift(booking);
       saveBookings(all);
@@ -1232,13 +1365,18 @@
         .join("\n");
       const waHref = waBookingLink(waMsg);
 
+      nextBtn.disabled = false;
+      nextBtn.textContent = prevLabel;
+
       $("#wizard").hidden = true;
       $("#confirm").hidden = false;
       $("#ref-code").textContent = ref;
-      $("#confirm-copy").textContent = `${s.j.title} · ${s.guests} guest${s.guests > 1 ? "s" : ""} · departing ${s.start} · ${money(s.total)}. Send this request on WhatsApp so the desk can confirm your itinerary.`;
+      const deskNote = result.ok
+        ? "Your request has been sent to the desk. We typically reply within one business day."
+        : "Your request is saved here in this browser. WhatsApp the desk if you need a faster reply.";
+      $("#confirm-copy").textContent = `${s.j.title} · ${s.guests} guest${s.guests > 1 ? "s" : ""} · departing ${s.start} · ${money(s.total)}. ${deskNote}`;
       const confirmWa = $("#confirm-wa");
       if (confirmWa) confirmWa.href = waHref;
-      window.open(waHref, "_blank", "noopener");
     }
 
     syncGuests();
@@ -1306,12 +1444,13 @@
     });
     const form = $("#contact-form");
     if (form) {
-      form.addEventListener("submit", (e) => {
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const name = $("#c-name");
         const email = $("#c-email");
         const about = $("#c-about");
         const msg = $("#c-msg");
+        const submitBtn = form.querySelector('button[type="submit"]');
         let ok = true;
         [["c-name", name, "Name is required."], ["c-email", email, "Valid email is required."], ["c-msg", msg, "Please write a short message."]].forEach(([, el, text]) => {
           const tip = el.parentElement.querySelector(".field-error") || (() => {
@@ -1326,20 +1465,45 @@
           if (bad) ok = false;
         });
         if (!ok) return;
+
+        const payload = {
+          ref: "MSG-" + Math.random().toString(36).slice(2, 8).toUpperCase(),
+          name: name.value.trim(),
+          email: email.value.trim(),
+          about: about.value.trim(),
+          message: msg.value.trim(),
+          created: new Date().toISOString(),
+        };
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Sending…";
+        }
+
+        await submitToDesk("contact", payload);
+
+        const contacts = loadContactMessages();
+        contacts.unshift(payload);
+        saveContactMessages(contacts);
+
         const waMsg = [
           "Hi Loop Trips!",
-          `Name: ${name.value.trim()}`,
-          `Email: ${email.value.trim()}`,
-          about.value.trim() ? `Trip style: ${about.value.trim()}` : "",
+          `Name: ${payload.name}`,
+          `Email: ${payload.email}`,
+          payload.about ? `Trip style: ${payload.about}` : "",
           "",
-          msg.value.trim(),
+          payload.message,
         ]
           .filter((line, i, arr) => line || (i > 0 && arr[i - 1]))
           .join("\n");
         const contactWa = waBookingLink(waMsg);
-        window.open(contactWa, "_blank", "noopener");
         const doneWa = $("#contact-done-wa");
         if (doneWa) doneWa.href = contactWa;
+
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Send to the desk";
+        }
         form.hidden = true;
         $("#contact-done").hidden = false;
       });
@@ -1385,7 +1549,7 @@
       if (el) el.addEventListener("change", () => setErr(el, ""));
     });
 
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const name = $("#a-name");
       const email = $("#a-email");
@@ -1395,6 +1559,7 @@
       const url = $("#a-url");
       const city = $("#a-city");
       const audience = $("#a-audience");
+      const submitBtn = form.querySelector('button[type="submit"]');
 
       let ok = true;
       if (!name.value.trim()) {
@@ -1433,6 +1598,14 @@
         commission: "10%",
         created: new Date().toISOString(),
       };
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending…";
+      }
+
+      await submitToDesk("affiliate", app);
+
       const all = loadAffiliateApps();
       all.unshift(app);
       saveAffiliateApps(all);
@@ -1455,12 +1628,16 @@
         .filter((line, i, arr) => line || (i > 0 && arr[i - 1]))
         .join("\n");
       const appWa = waBookingLink(waMsg);
-      window.open(appWa, "_blank", "noopener");
 
       const doneWa = $("#affiliate-done-wa");
       if (doneWa) doneWa.href = appWa;
       const refEl = $("#affiliate-ref");
       if (refEl) refEl.textContent = ref;
+
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit application";
+      }
       form.hidden = true;
       $("#affiliate-done").hidden = false;
     });

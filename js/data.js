@@ -13,7 +13,7 @@ LOOP.brand = {
   phoneTel: "+919951139299",
   whatsapp: "+91 99511 39299",
   whatsappLink: "https://wa.me/919951139299",
-  email: "concierge@looptrips.com",
+  email: "looptripsindia@gmail.com",
   city: "Hyderabad",
   address: "Hitech City, Madhapur",
   addressFull: "Hitech City, Madhapur, Hyderabad, Telangana 500081",
@@ -33,6 +33,9 @@ LOOP.founder = {
   role: "Founder",
   photo: "img/founder.jpg",
   photoAlt: "Aditya Vasa, founder of Loop Trips, standing in a tea estate",
+  tagline: "I walk the route before I write it.",
+  lede: "A brochure can sell a place. It cannot hold a week — the hour you arrive, the table you sit at, the road that is worth the dust.",
+  bio: "Loop Trips lives in Hyderabad because that is where I answer. From tea country to high passes, then the world when you are ready. You bring the dates and the budget. I hold the rest.",
 };
 
 LOOP.trust = {

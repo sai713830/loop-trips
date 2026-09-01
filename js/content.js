@@ -5,10 +5,11 @@
  */
 (function () {
   const KEY = "loop_cms";
-  const PROFILE_VERSION = 4;
+  const PROFILE_VERSION = 5;
 
   /** Canonical desk profile — wins over stale CMS brand contact fields on migrate. */
   const PROFILE = {
+    email: "looptripsindia@gmail.com",
     phone: "+91 99511 39299",
     phoneTel: "+919951139299",
     whatsapp: "+91 99511 39299",
@@ -160,7 +161,7 @@
         ...cms.brand,
         ...PROFILE,
         house: cms.brand.house || "Loop Trips",
-        email: cms.brand.email || "concierge@looptrips.com",
+        email: PROFILE.email,
         collection: cms.brand.collection || "Spice Route Luxe",
       };
       cms.brand = syncContactDerived(cms.brand);

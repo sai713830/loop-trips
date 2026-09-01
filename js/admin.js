@@ -687,39 +687,29 @@
   }
 
   function renderBookings() {
-    let bookings = [];
-    try {
-      bookings = JSON.parse(localStorage.getItem("loop_bookings") || "[]");
-    } catch {
-      bookings = [];
-    }
+    const email = (window.LOOP && LOOP.brand && LOOP.brand.email) || "looptripsindia@gmail.com";
     return `
       <div class="admin-top">
         <div>
-          <h2>Demo bookings</h2>
-          <p>Holds saved in this browser. Nothing is charged.</p>
+          <h2>Desk inbox</h2>
+          <p>Trip requests, contact messages, and affiliate applications are emailed to the desk automatically.</p>
         </div>
       </div>
-      ${
-        bookings.length
-          ? `<table class="pkg-table">
-            <thead><tr><th>Ref</th><th>Trip</th><th>Guest</th><th>Total</th><th></th></tr></thead>
-            <tbody>
-              ${bookings
-                .map(
-                  (b) => `<tr>
-                  <td>${escapeHtml(b.ref)}</td>
-                  <td><div class="title">${escapeHtml(b.title)}</div><div class="meta">${escapeHtml(b.start)} · ${b.guests} guests</div></td>
-                  <td>${escapeHtml(b.name || "—")}<div class="meta">${escapeHtml(b.email || "")}</div></td>
-                  <td>${money(b.total)}</td>
-                  <td><button class="btn btn-danger" type="button" data-cancel="${escapeAttr(b.ref)}">Release</button></td>
-                </tr>`
-                )
-                .join("")}
-            </tbody>
-          </table>`
-          : `<div class="empty">No demo bookings yet.</div>`
-      }`;
+      <div class="card">
+        <h3 style="margin-top:0;font-family:var(--serif);font-weight:500">Where submissions go</h3>
+        <p style="color:var(--admin-mute);line-height:1.6;margin:0 0 16px">
+          Every form on the public site sends to <strong>${escapeHtml(email)}</strong> via FormSubmit (free).
+          Check that inbox — including spam — for new trip requests and applications.
+        </p>
+        <ul style="color:var(--admin-mute);line-height:1.7;margin:0;padding-left:1.2rem">
+          <li><strong>Booking</strong> — book.html (all trips use the same form)</li>
+          <li><strong>Contact</strong> — contact.html</li>
+          <li><strong>Affiliate</strong> — affiliates.html</li>
+        </ul>
+        <p style="color:var(--admin-mute);font-size:.9rem;margin:16px 0 0">
+          First time only: FormSubmit sends a one-click activation link to ${escapeHtml(email)}. Confirm it once, then all future submissions arrive normally. No paid API or server storage needed.
+        </p>
+      </div>`;
   }
 
   function renderSettings() {
@@ -855,7 +845,7 @@
           ...state.cms.brand,
           ...LOOP.CMS.PROFILE,
           house: state.cms.brand.house || "Loop Trips",
-          email: state.cms.brand.email || "concierge@looptrips.com",
+          email: state.cms.brand.email || "looptripsindia@gmail.com",
           collection: state.cms.brand.collection || "Spice Route Luxe",
         });
         state.cms.profileVersion = LOOP.CMS.PROFILE_VERSION;
@@ -886,23 +876,6 @@
         };
         persist();
       };
-    }
-
-    if (state.view === "bookings") {
-      $$("[data-cancel]").forEach((b) => {
-        b.onclick = () => {
-          let list = [];
-          try {
-            list = JSON.parse(localStorage.getItem("loop_bookings") || "[]");
-          } catch {
-            list = [];
-          }
-          list = list.filter((x) => x.ref !== b.dataset.cancel);
-          localStorage.setItem("loop_bookings", JSON.stringify(list));
-          toast("Booking released");
-          render();
-        };
-      });
     }
 
     if (state.view === "settings") {
