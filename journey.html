@@ -43,6 +43,14 @@
       <a href="#book">Book</a>
     </div>
   </nav>
+  <script>
+    (function () {
+      var path = location.pathname + location.search;
+      document.querySelectorAll(".trip-nav a[href^='#']").forEach(function (a) {
+        a.setAttribute("href", path + a.getAttribute("href"));
+      });
+    })();
+  </script>
 
   <section>
     <div class="wrap detail-layout">

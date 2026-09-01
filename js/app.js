@@ -902,6 +902,73 @@
     if (window.LOOP_SEO && typeof window.LOOP_SEO.applyTrip === "function") {
       window.LOOP_SEO.applyTrip(j, col);
     }
+
+    bindTripNav();
+  }
+
+  function bindTripNav() {
+    const nav = document.querySelector(".trip-nav");
+    if (!nav || nav.dataset.bound === "1") return;
+    nav.dataset.bound = "1";
+
+    const pageUrl = () => `${location.pathname}${location.search}`;
+
+    const hashOf = (href) => {
+      const i = (href || "").indexOf("#");
+      return i >= 0 ? href.slice(i) : "";
+    };
+
+    nav.querySelectorAll("a[href]").forEach((a) => {
+      const hash = hashOf(a.getAttribute("href"));
+      if (hash && hash !== "#") a.setAttribute("href", `${pageUrl()}${hash}`);
+    });
+
+    const setActive = (id) => {
+      nav.querySelectorAll("a").forEach((a) => {
+        a.classList.toggle("on", hashOf(a.getAttribute("href")) === `#${id}`);
+      });
+    };
+
+    const jump = (hash, updateHistory) => {
+      const id = decodeURIComponent((hash || "").replace(/^#/, ""));
+      if (!id) return false;
+      const target = document.getElementById(id);
+      if (!target) return false;
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      setActive(id);
+      if (updateHistory) history.pushState(null, "", `${pageUrl()}#${id}`);
+      return true;
+    };
+
+    nav.addEventListener("click", (e) => {
+      const a = e.target.closest("a[href]");
+      if (!a || !nav.contains(a)) return;
+      const hash = hashOf(a.getAttribute("href"));
+      if (!hash) return;
+      e.preventDefault();
+      jump(hash, true);
+    });
+
+    const sectionIds = ["overview", "route", "itinerary", "included", "book"];
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (visible) setActive(visible.target.id);
+        },
+        { rootMargin: "-25% 0px -55% 0px", threshold: [0.1, 0.35, 0.6] }
+      );
+      sectionIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) io.observe(el);
+      });
+    }
+
+    if (location.hash) {
+      requestAnimationFrame(() => jump(location.hash, false));
+    }
   }
 
   function renderBook() {
