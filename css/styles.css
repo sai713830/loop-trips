@@ -1509,6 +1509,51 @@ section {
   font-size: 0.95rem;
 }
 
+#pricing-block {
+  margin: 36px 0 8px;
+  scroll-margin-top: 112px;
+}
+
+.price-table-note {
+  color: var(--mute);
+  font-size: 0.95rem;
+  margin: 0 0 16px;
+  max-width: 42rem;
+}
+
+.price-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+}
+
+.price-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.price-table th,
+.price-table td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.price-table th {
+  background: var(--paper-2, rgba(0, 0, 0, 0.03));
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.price-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.price-table td:first-child {
+  font-weight: 500;
+}
+
 .incl-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

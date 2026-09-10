@@ -75,7 +75,8 @@
   </svg>`;
 
   function colOf(j) {
-    return (LOOP.collections || []).find((c) => c.id === j.collection) || LOOP.world;
+    if (!j) return LOOP.world;
+    return (LOOP.collections || []).find((c) => c && c.id === j.collection) || LOOP.world;
   }
 
   function header(active) {
@@ -185,10 +186,12 @@
   }
 
   function card(j) {
+    if (!j || !j.id) return "";
+    const locs = Array.isArray(j.locations) ? j.locations : [];
     const cities = j.sealed
       ? "Revealed 48 hours before you fly"
-      : j.locations.slice(0, 4).join(" · ");
-    const extra = !j.sealed && j.locations.length > 4 ? ` +${j.locations.length - 4}` : "";
+      : locs.slice(0, 4).join(" · ");
+    const extra = !j.sealed && locs.length > 4 ? ` +${locs.length - 4}` : "";
     const seats =
       typeof j.seats === "number"
         ? `<p class="seats">${j.seats} seat${j.seats === 1 ? "" : "s"} left in this circle</p>`
@@ -196,15 +199,15 @@
     const kicker = j.collection && j.collection !== "world" ? `${j.country} · ${colOf(j).name}` : `${j.country} · ${j.region}`;
     return `<a class="journey-card" href="${tripHref(j.id)}">
       <div class="thumb">
-        <img src="${j.image || ""}" alt="${j.title}, ${j.country}" loading="lazy">
+        <img src="${j.image || ""}" alt="${j.title || ""}, ${j.country || ""}" loading="lazy">
       </div>
       <div class="meta">
         <p class="card-kicker">${kicker}</p>
-        <h3>${j.title}</h3>
+        <h3>${j.title || "Trip"}</h3>
         <p class="card-cities">${cities}${extra}</p>
         ${seats}
         <div class="line">
-          <span>${j.duration}</span>
+          <span>${j.duration || ""}</span>
           <span class="price">${fromPrice(j)} / person</span>
         </div>
       </div>
@@ -271,7 +274,8 @@
   }
 
   function getJourney(id) {
-    return LOOP.journeys.find((j) => j.id === id);
+    if (!id) return null;
+    return LOOP.journeys.find((j) => j && j.id === id) || null;
   }
 
   function saveBookings(list) {
@@ -828,9 +832,10 @@
     const draw = () => {
       const q = (search.value || "").toLowerCase().trim();
       const list = LOOP.journeys.filter((j) => {
+        if (!j || !j.id) return false;
         const colOk = !collection || j.collection === collection;
         const regionOk = !region || j.region === region;
-        const hay = `${j.title} ${j.country} ${j.locations.join(" ")} ${j.theme} ${j.collection}`.toLowerCase();
+        const hay = `${j.title} ${j.country} ${(j.locations || []).join(" ")} ${j.theme} ${j.collection}`.toLowerCase();
         return colOk && regionOk && (!q || hay.includes(q));
       });
       $("#count").textContent = `${list.length} trip${list.length === 1 ? "" : "s"}`;
@@ -883,32 +888,35 @@
       heroBg.alt = `${j.title}, ${j.country}`;
     }
     $("#d-crumbs").innerHTML = `<a href="index.html">Home</a> / <a href="${col.href || "journeys.html"}">${col.name}</a> / ${j.title}`;
-    $("#d-title").textContent = j.title;
+    $("#d-title").textContent = j.title || "";
+    const locs = Array.isArray(j.locations) ? j.locations : [];
     $("#d-sub").textContent = j.sealed
       ? `${j.country} · Revealed 48 hours before you fly`
-      : `${j.country} · ${j.locations.join(" · ")}`;
-    $("#d-story").textContent = j.story;
-    $("#d-card-title").textContent = j.title;
-    $("#d-duration").textContent = j.duration;
-    $("#d-best").textContent = j.bestTime;
+      : `${j.country || ""} · ${locs.join(" · ") || "India"}`;
+    $("#d-story").textContent = j.story || j.blurb || "";
+    $("#d-card-title").textContent = j.title || "";
+    $("#d-duration").textContent = j.duration || "";
+    $("#d-best").textContent = j.bestTime || "";
     $("#d-price").textContent = fromPrice(j);
-    $("#d-status").textContent = j.status;
+    $("#d-status").textContent = j.status || "Open";
     $("#d-pax").textContent = j.minPax
       ? `${j.minPax}–${j.maxPax} guests`
       : `${j.pax || 2} guests`;
 
-    $("#f-duration").textContent = j.duration;
+    $("#f-duration").textContent = j.duration || "";
     $("#f-places").textContent = j.sealed
       ? "Sealed"
-      : j.locations.length === 1
-        ? j.locations[0]
-        : `${j.locations.length} places`;
+      : locs.length === 1
+        ? locs[0]
+        : locs.length
+          ? `${locs.length} places`
+          : "—";
     $("#f-price").textContent = `${fromPrice(j)} / person`;
     $("#f-pax").textContent = j.minPax ? `${j.minPax}–${j.maxPax}` : `${j.pax || 2} guests`;
-    $("#f-best").textContent = j.bestTime;
-    $("#f-status").textContent = j.status;
+    $("#f-best").textContent = j.bestTime || "";
+    $("#f-status").textContent = j.status || "Open";
 
-    $("#d-route").innerHTML = (j.locations || []).map((l) => `<li>${l}</li>`).join("") || "<li>—</li>";
+    $("#d-route").innerHTML = locs.map((l) => `<li>${l}</li>`).join("") || "<li>—</li>";
     $("#d-highlights-main").innerHTML = (j.highlights || []).map((h) => `<li>${h}</li>`).join("") || "<li>Details confirmed with the desk after hold.</li>";
     $("#d-inclusions").innerHTML = (j.inclusions || []).map((h) => `<li>${h}</li>`).join("") || "<li>Confirmed on your itinerary.</li>";
     $("#d-exclusions").innerHTML = (LOOP.exclusions || []).map((h) => `<li>${h}</li>`).join("");
@@ -921,6 +929,28 @@
         </article>`
       )
       .join("");
+
+    const pricingBlock = $("#pricing-block");
+    const navPricing = $("#nav-pricing");
+    const pt = j.priceTable;
+    if (pricingBlock && pt && Array.isArray(pt.rows) && pt.rows.length) {
+      pricingBlock.hidden = false;
+      if (navPricing) navPricing.hidden = false;
+      const note = $("#d-price-note");
+      if (note) note.textContent = pt.label || "Rates by group size. Confirm before booking.";
+      const cols = pt.columns && pt.columns.length ? pt.columns : ["Price"];
+      const head = `<thead><tr><th>Pax</th>${cols.map((c) => `<th>${c}</th>`).join("")}</tr></thead>`;
+      const body = pt.rows
+        .map((r) => {
+          const vals = Array.isArray(r.values) ? r.values : [r.price || r.value || 0];
+          return `<tr><td>${r.pax} Pax</td>${vals.map((v) => `<td>${money(v)}</td>`).join("")}</tr>`;
+        })
+        .join("");
+      $("#d-price-table").innerHTML = `<table class="price-table">${head}<tbody>${body}</tbody></table>`;
+    } else if (pricingBlock) {
+      pricingBlock.hidden = true;
+      if (navPricing) navPricing.hidden = true;
+    }
 
     const gallery = [...(j.gallery || [])].filter((src) => src !== j.image).slice(0, 3);
     const gal = $("#d-gallery");

@@ -5,7 +5,7 @@
  */
 (function () {
   const KEY = "loop_cms";
-  const PROFILE_VERSION = 5;
+  const PROFILE_VERSION = 7;
 
   /** Canonical desk profile — wins over stale CMS brand contact fields on migrate. */
   const PROFILE = {
@@ -221,16 +221,45 @@
       }
     }
 
-    const seedJourneys = LOOP.journeys || [];
+    const seedJourneys = (LOOP.journeys || []).filter((j) => j && j.id);
     if (Array.isArray(cms.journeys) && cms.journeys.length) {
-      const byId = new Map(cms.journeys.map((j) => [j.id, j]));
+      const byId = new Map(
+        cms.journeys.filter((j) => j && j.id).map((j) => [j.id, j])
+      );
       seedJourneys.forEach((j) => {
-        if (!byId.has(j.id)) {
+        const existing = byId.get(j.id);
+        if (!existing) {
           byId.set(j.id, clone(j));
+          changed = true;
+          return;
+        }
+        const incomplete =
+          !existing.image ||
+          !existing.story ||
+          !existing.title ||
+          !Array.isArray(existing.locations) ||
+          !existing.locations.length ||
+          !Array.isArray(existing.itinerary) ||
+          !existing.itinerary.length ||
+          !Array.isArray(existing.highlights) ||
+          !existing.highlights.length;
+        const needsPriceSync =
+          j.priceTable &&
+          (!existing.priceTable ||
+            existing.price !== j.price ||
+            existing.image !== j.image ||
+            existing.story !== j.story);
+        if (incomplete || needsPriceSync) {
+          byId.set(j.id, {
+            ...clone(j),
+            status: existing.status || j.status,
+            featured: existing.featured != null ? existing.featured : j.featured,
+          });
           changed = true;
         }
       });
-      if (changed) cms.journeys = [...byId.values()];
+      cms.journeys = [...byId.values()].filter((j) => j && j.id);
+      if (cms.profileVersion !== PROFILE_VERSION) changed = true;
     } else if (seedJourneys.length) {
       cms.journeys = clone(seedJourneys);
       changed = true;
@@ -255,11 +284,13 @@
       LOOP.collections = cms.collections;
     }
     if (Array.isArray(cms.journeys) && cms.journeys.length) {
-      LOOP.journeys = cms.journeys.map((j) => {
-        j.currency = "INR";
-        if (!j.collection) j.collection = "world";
-        return j;
-      });
+      LOOP.journeys = cms.journeys
+        .filter((j) => j && j.id)
+        .map((j) => {
+          j.currency = "INR";
+          if (!j.collection) j.collection = "world";
+          return j;
+        });
     }
     if (cms.home) {
       LOOP.home = {
