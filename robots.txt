@@ -8,6 +8,8 @@ Disallow: /admin.html
 Disallow: /admin-gate.html
 Disallow: /bookings
 Disallow: /bookings.html
+Disallow: /thank-you
+Disallow: /thank-you.html
 Disallow: /css/admin.css
 Disallow: /js/admin.js
 Disallow: /api/admin-login

@@ -13,6 +13,10 @@
     {
       "source": "/trip/:id",
       "destination": "/journey?id=:id"
+    },
+    {
+      "source": "/places-to-visit-in-:slug",
+      "destination": "/place?slug=:slug"
     }
   ],
   "headers": [
@@ -45,6 +49,18 @@
     },
     {
       "source": "/bookings.html",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    },
+    {
+      "source": "/thank-you",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    },
+    {
+      "source": "/thank-you.html",
       "headers": [
         { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
       ]

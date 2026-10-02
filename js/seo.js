@@ -70,6 +70,34 @@
     PAGE_PATHS[c.path] = { changefreq: "weekly", priority: "0.85" };
   });
 
+  const DESTINATION_PATHS = [
+    "/places-to-visit-in-goa",
+    "/places-to-visit-in-kerala",
+    "/places-to-visit-in-himachal-pradesh",
+    "/places-to-visit-in-ladakh",
+    "/places-to-visit-in-rajasthan",
+    "/places-to-visit-in-uttarakhand",
+    "/places-to-visit-in-jammu-and-kashmir",
+  ];
+  DESTINATION_PATHS.forEach((path) => {
+    PAGE_PATHS[path] = { changefreq: "weekly", priority: "0.88" };
+  });
+
+  function destinationSlugFromLocation() {
+    const path = normalizePath(location.pathname);
+    const match = path.match(/^\/places-to-visit-in-([^/]+)$/);
+    if (match) return decodeURIComponent(match[1]);
+    if (path === "/place") {
+      const slug = new URLSearchParams(location.search).get("slug");
+      if (slug) return slug;
+    }
+    return null;
+  }
+
+  function destinationPath(slug) {
+    return `/places-to-visit-in-${encodeURIComponent(slug)}`;
+  }
+
   function normalizePath(pathname) {
     let path = pathname || "/";
     if (path.endsWith("/index.html")) path = path.slice(0, -"/index.html".length) || "/";
@@ -92,6 +120,8 @@
   function canonicalPath() {
     const tripId = journeyIdFromLocation();
     if (tripId) return `/trip/${encodeURIComponent(tripId)}`;
+    const destSlug = destinationSlugFromLocation();
+    if (destSlug) return destinationPath(destSlug);
     const path = normalizePath(location.pathname);
     return path === "/" ? "" : path;
   }
@@ -370,6 +400,7 @@
     const page = document.body?.dataset?.page;
     if (page === "journey" && journeyIdFromLocation()) return;
     if (page === "collection") return;
+    if (page === "destination") return;
 
     applyDocumentMeta();
     applyFaqFromDom();
@@ -390,7 +421,84 @@
     applyFaqFromDom();
   }
 
-  function applyTrip(journey, collection) {
+  function applyDestination(dest, trips) {
+    if (!dest) return;
+    const path = dest.path || destinationPath(dest.slug);
+    const url = `${ORIGIN}${path}`;
+    const title = dest.metaTitle || `${dest.h1} | Loop Trips`;
+    const description = dest.metaDescription || "";
+    const image = dest.image || OG_IMAGE;
+    applyDocumentMeta({ title, description, url, image });
+    applyBreadcrumbs([
+      { name: "Home", url: ORIGIN },
+      { name: "India", url: `${ORIGIN}/journeys` },
+      { name: dest.name, url },
+    ]);
+
+    const placeItems = (dest.places || []).slice(0, 12).map((place, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: place.title,
+      description: place.body,
+    }));
+
+    const tripItems = (trips || []).slice(0, 12).map((trip, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: trip.title,
+      url: `${ORIGIN}${tripPath(trip.id)}`,
+    }));
+
+    setJsonLd("destination", {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": ["CollectionPage", "WebPage"],
+          "@id": `${url}#webpage`,
+          url,
+          name: title,
+          description,
+          isPartOf: { "@id": `${ORIGIN}/#website` },
+          about: { "@id": `${url}#destination` },
+          inLanguage: "en-IN",
+          breadcrumb: { "@id": `${url}#breadcrumbs` },
+        },
+        {
+          "@type": "TouristDestination",
+          "@id": `${url}#destination`,
+          name: dest.name,
+          description: dest.intro || description,
+          url,
+          touristType: "Leisure travellers",
+          containedInPlace: {
+            "@type": "Country",
+            name: "India",
+          },
+        },
+        {
+          "@type": "ItemList",
+          "@id": `${url}#places`,
+          name: `Best places to visit in ${dest.name}`,
+          numberOfItems: placeItems.length,
+          itemListElement: placeItems,
+        },
+        tripItems.length
+          ? {
+              "@type": "ItemList",
+              "@id": `${url}#trips`,
+              name: `Loop Trips packages in ${dest.name}`,
+              numberOfItems: tripItems.length,
+              itemListElement: tripItems,
+            }
+          : null,
+      ].filter(Boolean),
+    });
+
+    applyOrganizationSchema();
+    applyFaqFromDom();
+  }
+
+  function applyTrip(journey, collection, destination) {
     if (!journey) return;
     const col = collection || { name: "Trips", href: "/journeys" };
     const colPath = COLLECTION_SEO[col.id]?.path || normalizePath(col.href || "/journeys");
@@ -404,11 +512,19 @@
 
     applyDocumentMeta({ title, description, url, image });
     upsertMeta('meta[name="author"]', { name: "author", content: founderFromLoop().name });
-    applyBreadcrumbs([
-      { name: "Home", url: ORIGIN },
-      { name: col.name, url: `${ORIGIN}${colPath.startsWith("/") ? colPath : `/${colPath}`}` },
-      { name: journey.title, url },
-    ]);
+
+    const crumbs = [{ name: "Home", url: ORIGIN }];
+    if (destination && destination.path) {
+      crumbs.push({ name: "India", url: `${ORIGIN}/journeys` });
+      crumbs.push({ name: destination.name, url: `${ORIGIN}${destination.path}` });
+    } else {
+      crumbs.push({
+        name: col.name,
+        url: `${ORIGIN}${colPath.startsWith("/") ? colPath : `/${colPath}`}`,
+      });
+    }
+    crumbs.push({ name: journey.title, url });
+    applyBreadcrumbs(crumbs);
 
     setJsonLd("trip", {
       "@context": "https://schema.org",
@@ -466,8 +582,11 @@
     SITE_NAME,
     COLLECTION_SEO,
     PAGE_PATHS,
+    DESTINATION_PATHS,
     normalizePath,
     journeyIdFromLocation,
+    destinationSlugFromLocation,
+    destinationPath,
     canonicalPath,
     canonicalUrl,
     tripPath,
@@ -475,6 +594,7 @@
     applyFromDocument,
     applyDocumentMeta,
     applyCollection,
+    applyDestination,
     applyTrip,
     applyFaqFromDom,
     applyPersonSchema,
@@ -488,6 +608,8 @@
       /* app.js calls applyTrip after journey data loads */
     } else if (document.body.dataset.page === "collection") {
       /* app.js calls applyCollection after collection renders */
+    } else if (document.body.dataset.page === "destination") {
+      /* app.js calls applyDestination after destination renders */
     } else {
       applyFromDocument();
     }

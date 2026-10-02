@@ -6,6 +6,7 @@ import {
 
 const GATE = "/admin-gate.html";
 const TRIP_PATH = /^\/trip\/([^/]+)\/?$/;
+const PLACE_PATH = /^\/places-to-visit-in-([^/]+)\/?$/;
 
 function isProtected(pathname) {
   return pathname === "/admin" || pathname === "/admin.html" || pathname === "/js/admin.js";
@@ -20,11 +21,23 @@ function rewriteTrip(request, id) {
   });
 }
 
+function rewritePlace(request, slug) {
+  const target = new URL(request.url);
+  target.pathname = "/place";
+  target.search = `?slug=${encodeURIComponent(decodeURIComponent(slug))}`;
+  return new Response(null, {
+    headers: { "x-middleware-rewrite": target.pathname + target.search },
+  });
+}
+
 export default async function middleware(request) {
   const { pathname } = new URL(request.url);
 
   const tripMatch = pathname.match(TRIP_PATH);
   if (tripMatch) return rewriteTrip(request, tripMatch[1]);
+
+  const placeMatch = pathname.match(PLACE_PATH);
+  if (placeMatch) return rewritePlace(request, placeMatch[1]);
 
   if (!isProtected(pathname)) return;
 
@@ -46,5 +59,5 @@ export default async function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/trip/:path*", "/admin", "/admin.html", "/js/admin.js"],
+  matcher: ["/trip/:path*", "/places-to-visit-in-:path*", "/admin", "/admin.html", "/js/admin.js"],
 };

@@ -1,5 +1,6 @@
 {
   "rewrites": [
-    { "source": "/trip/:id", "destination": "/journey.html" }
+    { "source": "/trip/:id", "destination": "/journey.html" },
+    { "source": "/places-to-visit-in-:slug", "destination": "/place.html" }
   ]
 }

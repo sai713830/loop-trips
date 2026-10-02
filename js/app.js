@@ -151,8 +151,19 @@
             <a href="index.html#india">India packages</a>
             <a href="community.html">Community</a>
             <a href="index.html#world">The world</a>
+            <a href="index.html#enquire">Plan a trip</a>
             <a href="book.html">Request a trip</a>
             <a href="bookings.html">My bookings</a>
+          </div>
+          <div class="foot-col">
+            <p class="eyebrow">India guides</p>
+            <a href="/places-to-visit-in-goa">Goa</a>
+            <a href="/places-to-visit-in-kerala">Kerala</a>
+            <a href="/places-to-visit-in-himachal-pradesh">Himachal</a>
+            <a href="/places-to-visit-in-ladakh">Ladakh</a>
+            <a href="/places-to-visit-in-rajasthan">Rajasthan</a>
+            <a href="/places-to-visit-in-uttarakhand">Uttarakhand</a>
+            <a href="/places-to-visit-in-jammu-and-kashmir">Jammu &amp; Kashmir</a>
           </div>
           <div class="foot-col">
             <p class="eyebrow">India ways</p>
@@ -270,6 +281,14 @@
       const match = location.pathname.match(/\/trip\/([^/]+)\/?$/);
       if (match) return decodeURIComponent(match[1]);
     }
+    if (name === "slug") {
+      if (window.LOOP_SEO && typeof window.LOOP_SEO.destinationSlugFromLocation === "function") {
+        const fromPath = window.LOOP_SEO.destinationSlugFromLocation();
+        if (fromPath) return fromPath;
+      }
+      const match = location.pathname.match(/\/places-to-visit-in-([^/]+)\/?$/);
+      if (match) return decodeURIComponent(match[1]);
+    }
     return new URLSearchParams(location.search).get(name);
   }
 
@@ -302,12 +321,233 @@
     }
   }
 
+  const AD_PARAM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "gclid", "fbclid", "gad_source"];
+  const LEAD_THANKS_KEY = "loop_lead_thanks";
+  const AD_PARAMS_KEY = "loop_ad_params";
+
+  function captureAdParams() {
+    try {
+      const params = new URLSearchParams(location.search);
+      const stored = JSON.parse(sessionStorage.getItem(AD_PARAMS_KEY) || "{}");
+      AD_PARAM_KEYS.forEach((key) => {
+        const value = params.get(key);
+        if (value) stored[key] = value;
+      });
+      sessionStorage.setItem(AD_PARAMS_KEY, JSON.stringify(stored));
+      return stored;
+    } catch {
+      return {};
+    }
+  }
+
+  function loadAdParams() {
+    try {
+      return JSON.parse(sessionStorage.getItem(AD_PARAMS_KEY) || "{}");
+    } catch {
+      return {};
+    }
+  }
+
+  function saveLeads(list) {
+    localStorage.setItem("loop_home_leads", JSON.stringify(list));
+  }
+
+  function loadLeads() {
+    try {
+      return JSON.parse(localStorage.getItem("loop_home_leads") || "[]");
+    } catch {
+      return [];
+    }
+  }
+
+  function setFieldError(el, msg) {
+    if (!el) return;
+    el.classList.toggle("invalid", !!msg);
+    let tip = el.parentElement.querySelector(".field-error");
+    if (!tip) {
+      tip = document.createElement("p");
+      tip.className = "field-error";
+      el.parentElement.appendChild(tip);
+    }
+    tip.textContent = msg || "";
+  }
+
+  function bindHomeLeadForm() {
+    const form = $("#home-lead-form");
+    if (!form) return;
+
+    const name = $("#lead-name");
+    const phone = $("#lead-phone");
+    const email = $("#lead-email");
+    const destination = $("#lead-destination");
+    const when = $("#lead-when");
+    const honey = $("#lead-company");
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const formError = $("#lead-form-error");
+
+    ["lead-name", "lead-phone", "lead-email", "lead-destination"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("input", () => setFieldError(el, ""));
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (formError) formError.textContent = "";
+
+      let ok = true;
+      if (!name.value.trim()) {
+        setFieldError(name, "Name is required.");
+        ok = false;
+      } else setFieldError(name, "");
+      if (!phone.value.trim() || phone.value.trim().replace(/\D/g, "").length < 10) {
+        setFieldError(phone, "Enter a valid WhatsApp number.");
+        ok = false;
+      } else setFieldError(phone, "");
+      if (!email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+        setFieldError(email, "Enter a valid email.");
+        ok = false;
+      } else setFieldError(email, "");
+      if (!destination.value.trim()) {
+        setFieldError(destination, "Tell us a destination — or write not sure yet.");
+        ok = false;
+      } else setFieldError(destination, "");
+      if (!ok) return;
+
+      if (honey && honey.value.trim()) {
+        location.href = "thank-you.html";
+        return;
+      }
+
+      const ads = loadAdParams();
+      const payload = {
+        ref: "LEAD-" + Math.random().toString(36).slice(2, 8).toUpperCase(),
+        name: name.value.trim(),
+        phone: phone.value.trim(),
+        email: email.value.trim(),
+        destination: destination.value.trim(),
+        travel_month: when && when.value ? when.value : "",
+        created: new Date().toISOString(),
+        page: location.pathname + location.search + location.hash,
+        referrer: document.referrer || "",
+        ...ads,
+      };
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending…";
+      }
+
+      const result = await Promise.race([
+        submitToDesk("lead", payload),
+        new Promise((resolve) => setTimeout(() => resolve({ ok: false, error: "timeout" }), 12000)),
+      ]);
+
+      if (!result || !result.ok) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Send my request";
+        }
+        const waMsg = [
+          "Hi Loop Trips! I want to plan a trip.",
+          `Name: ${payload.name}`,
+          `WhatsApp: ${payload.phone}`,
+          `Email: ${payload.email}`,
+          `Destination: ${payload.destination}`,
+          payload.travel_month ? `Month: ${payload.travel_month}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n");
+        if (formError) {
+          formError.textContent = "";
+          const note = document.createElement("span");
+          note.textContent = "The desk inbox did not receive this yet. Send the same details on WhatsApp so we do not miss you. ";
+          const link = document.createElement("a");
+          link.href = waBookingLink(waMsg);
+          link.target = "_blank";
+          link.rel = "noopener";
+          link.textContent = "Open WhatsApp";
+          formError.append(note, link);
+        }
+        return;
+      }
+
+      const leads = loadLeads();
+      leads.unshift(payload);
+      saveLeads(leads);
+
+      try {
+        sessionStorage.setItem(
+          LEAD_THANKS_KEY,
+          JSON.stringify({
+            name: payload.name,
+            phone: payload.phone,
+            email: payload.email,
+            destination: payload.destination,
+            travel_month: payload.travel_month,
+            ref: payload.ref,
+          })
+        );
+      } catch {
+        /* ignore quota */
+      }
+
+      location.href = "thank-you.html";
+    });
+  }
+
+  function renderThankYou() {
+    let lead = null;
+    try {
+      lead = JSON.parse(sessionStorage.getItem(LEAD_THANKS_KEY) || "null");
+    } catch {
+      lead = null;
+    }
+
+    const title = $("#thanks-title");
+    const copy = $("#thanks-copy");
+    const refEl = $("#thanks-ref");
+    const wa = $("#thanks-wa");
+
+    if (lead && title) {
+      const first = lead.name.split(/\s+/)[0];
+      title.textContent = first ? `Thank you, ${first}.` : "Thank you.";
+    }
+    if (lead && copy) {
+      const dest = lead.destination ? ` for ${lead.destination}` : "";
+      copy.textContent = `We have your details${dest}. A planner in Hyderabad will reply with a route and from-price — typically within one business day. WhatsApp is fastest if you want to talk now.`;
+    }
+    if (lead && refEl) {
+      refEl.hidden = false;
+      refEl.textContent = lead.ref;
+    }
+
+    const waMsg = lead
+      ? [
+          `Hi Loop Trips — I just sent a trip enquiry (ref ${lead.ref}).`,
+          `Name: ${lead.name}`,
+          lead.destination ? `Destination: ${lead.destination}` : "",
+          lead.travel_month ? `Month: ${lead.travel_month}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n")
+      : waEnquiryMessage();
+    if (wa) wa.href = waBookingLink(waMsg);
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "generate_lead",
+      lead_ref: lead && lead.ref ? lead.ref : "",
+    });
+  }
+
   async function submitToDesk(type, data) {
     const to = brand().email || "looptripsindia@gmail.com";
     const subjects = {
       booking: `Trip request ${data.ref} — ${data.title}`,
       contact: `Contact from ${data.name}`,
       affiliate: `Affiliate application ${data.ref} — ${data.name}`,
+      lead: `Trip enquiry ${data.ref} — ${data.name}`,
     };
     const fields = {};
     Object.entries(data).forEach(([key, val]) => {
@@ -342,26 +582,39 @@
     const home = LOOP.home || {};
     const strip = $("#dest-strip");
     if (strip) {
-      const picks = (home.indiaStrip || [
-        "forts-and-palaces",
-        "kashi-antarah",
-        "high-road-leh",
-        "backwater-spices",
-        "valley-of-serenity",
-        "durga-pujo",
-        "himalayan-expedition",
-        "coffee-capital",
-      ])
-        .map(getJourney)
-        .filter(Boolean);
-      strip.innerHTML = picks
-        .map(
-          (j) => `<a class="dest-tile" href="${tripHref(j.id)}">
-            <img src="${j.image}" alt="${j.country}" loading="lazy">
-            <span>${j.country}</span>
-          </a>`
-        )
-        .join("");
+      const destApi = window.LOOP_DESTINATIONS;
+      if (destApi && Array.isArray(destApi.list) && destApi.list.length) {
+        strip.innerHTML = destApi.list
+          .map((d) => {
+            const img = destinationImage(d);
+            return `<a class="dest-tile" href="${d.path}">
+              <img src="${img}" alt="${d.name}" loading="lazy">
+              <span>${d.name}</span>
+            </a>`;
+          })
+          .join("");
+      } else {
+        const picks = (home.indiaStrip || [
+          "forts-and-palaces",
+          "kashi-antarah",
+          "high-road-leh",
+          "backwater-spices",
+          "valley-of-serenity",
+          "durga-pujo",
+          "himalayan-expedition",
+          "coffee-capital",
+        ])
+          .map(getJourney)
+          .filter(Boolean);
+        strip.innerHTML = picks
+          .map(
+            (j) => `<a class="dest-tile" href="${tripHref(j.id)}">
+              <img src="${j.image}" alt="${j.country}" loading="lazy">
+              <span>${j.country}</span>
+            </a>`
+          )
+          .join("");
+      }
     }
 
     const packs = $("#package-grid");
@@ -440,6 +693,7 @@
 
     renderReviews("#reviews-grid");
     renderGallery("#gallery-grid");
+    bindHomeLeadForm();
 
     if (typeof window.renderWorldMap === "function") window.renderWorldMap();
   }
@@ -873,6 +1127,171 @@
     draw();
   }
 
+  function escapeHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function destinationImage(dest) {
+    if (!dest) return "";
+    if (dest.image) return dest.image;
+    const fromTrip = getJourney(dest.imageFrom);
+    if (fromTrip && fromTrip.image) return fromTrip.image;
+    const trips = window.LOOP_DESTINATIONS
+      ? window.LOOP_DESTINATIONS.journeysFor(dest, LOOP.journeys || [])
+      : [];
+    return (trips[0] && trips[0].image) || "";
+  }
+
+  function renderDestination() {
+    const api = window.LOOP_DESTINATIONS;
+    const root = $("#destination-root");
+    if (!api || !root) {
+      location.href = "journeys.html";
+      return;
+    }
+    const dest = api.bySlug(param("slug"));
+    if (!dest) {
+      location.href = "journeys.html";
+      return;
+    }
+
+    const trips = api.journeysFor(dest, LOOP.journeys || []);
+    const image = destinationImage(dest);
+    dest.image = image;
+
+    const introHtml = String(dest.intro || "")
+      .split(/\n\n+/)
+      .filter(Boolean)
+      .map((p) => `<p>${escapeHtml(p)}</p>`)
+      .join("");
+
+    const placesHtml = (dest.places || [])
+      .map(
+        (place, i) => `<article class="dest-place">
+          <span class="n">${String(i + 1).padStart(2, "0")}</span>
+          <div>
+            <h3>${escapeHtml(place.title)}</h3>
+            <p>${escapeHtml(place.body)}</p>
+          </div>
+        </article>`
+      )
+      .join("");
+
+    const faqHtml = (dest.faqs || [])
+      .map(
+        (f, i) => `<article>
+          <span class="n">${i + 1}</span>
+          <h3>${escapeHtml(f.q)}</h3>
+          <p>${escapeHtml(f.a)}</p>
+        </article>`
+      )
+      .join("");
+
+    const siblings = (api.list || [])
+      .filter((d) => d.slug !== dest.slug)
+      .map((d) => `<a href="${d.path}">${escapeHtml(d.name)}</a>`)
+      .join("");
+
+    root.innerHTML = `
+      <div class="page-hero dest-hero" style="min-height:62vh">
+        <img class="bg" src="${image}" alt="${escapeHtml(dest.name)}">
+        <div class="wrap">
+          <p class="crumbs"><a href="index.html">Home</a> / <a href="journeys.html">India</a> / ${escapeHtml(dest.name)}</p>
+          <p class="eyebrow">2026 travel guide</p>
+          <h1>${escapeHtml(dest.h1)}</h1>
+          <p class="lede">${escapeHtml((dest.overview || dest.metaDescription || "").slice(0, 220))}</p>
+          <div class="btn-row">
+            <a class="btn btn-light" href="#dest-trips">See ${escapeHtml(dest.name)} trips</a>
+            <a class="btn btn-ghost" href="book.html">Plan with the desk</a>
+          </div>
+        </div>
+      </div>
+
+      <section id="dest-trips">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">${trips.length ? `${trips.length} packages` : "Private trips"}</p>
+              <h2>${escapeHtml(dest.name)} journeys from Hyderabad</h2>
+            </div>
+            <a class="more" href="journeys.html?region=India">All India trips</a>
+          </div>
+          ${
+            trips.length
+              ? `<div class="grid-3">${trips.map(card).join("")}</div>`
+              : `<p class="dest-empty">Tell the desk your dates — we shape a private ${escapeHtml(dest.name)} route from ₹30,000.</p>
+                 <div class="btn-row" style="margin-top:18px">
+                   <a class="btn" href="book.html">Request a trip</a>
+                   <a class="btn btn-ghost" href="contact.html">Contact</a>
+                 </div>`
+          }
+        </div>
+      </section>
+
+      <section class="dest-editorial">
+        <div class="wrap dest-editorial-grid">
+          <div>
+            <p class="eyebrow">Why this guide</p>
+            <h2>Choose the ${escapeHtml(dest.name)} that fits this trip</h2>
+            <div class="dest-intro">${introHtml}</div>
+            ${dest.overview ? `<p class="dest-overview"><strong>First-timer map:</strong> ${escapeHtml(dest.overview)}</p>` : ""}
+          </div>
+          <aside class="dest-aside">
+            <p class="eyebrow">Plan with Loop Trips</p>
+            <h3>Finished routes, not hotel lists</h3>
+            <p>India from ₹30,000. The Hyderabad desk reshapes days, stays, and pace to your budget.</p>
+            <a class="btn" href="book.html">Request a trip</a>
+            <a class="btn btn-ghost" href="concierge.html">Ask the concierge</a>
+          </aside>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Places</p>
+              <h2>Best places to visit in ${escapeHtml(dest.name)}</h2>
+            </div>
+          </div>
+          <div class="dest-places">${placesHtml}</div>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Questions</p>
+              <h2>${escapeHtml(dest.name)} — frequently asked</h2>
+            </div>
+          </div>
+          <div class="how" data-seo-faq>${faqHtml}</div>
+        </div>
+      </section>
+
+      <section class="dest-siblings">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">More India guides</p>
+              <h2>Explore neighbouring pillars</h2>
+            </div>
+          </div>
+          <div class="dest-sibling-links">${siblings}</div>
+        </div>
+      </section>
+    `;
+
+    if (window.LOOP_SEO && typeof window.LOOP_SEO.applyDestination === "function") {
+      window.LOOP_SEO.applyDestination(dest, trips);
+    }
+  }
+
   function renderDetail() {
     const j = getJourney(param("id"));
     if (!j) {
@@ -881,13 +1300,19 @@
     }
 
     const col = colOf(j);
+    const destApi = window.LOOP_DESTINATIONS;
+    const dest = destApi && typeof destApi.matchJourney === "function" ? destApi.matchJourney(j) : null;
 
     const heroBg = $("#hero-bg");
     if (heroBg && j.image) {
       heroBg.src = j.image;
       heroBg.alt = `${j.title}, ${j.country}`;
     }
-    $("#d-crumbs").innerHTML = `<a href="index.html">Home</a> / <a href="${col.href || "journeys.html"}">${col.name}</a> / ${j.title}`;
+    if (dest && dest.path) {
+      $("#d-crumbs").innerHTML = `<a href="index.html">Home</a> / <a href="journeys.html">India</a> / <a href="${dest.path}">${dest.name}</a> / ${j.title}`;
+    } else {
+      $("#d-crumbs").innerHTML = `<a href="index.html">Home</a> / <a href="${col.href || "journeys.html"}">${col.name}</a> / ${j.title}`;
+    }
     $("#d-title").textContent = j.title || "";
     const locs = Array.isArray(j.locations) ? j.locations : [];
     $("#d-sub").textContent = j.sealed
@@ -978,9 +1403,18 @@
       );
     }
 
-    const related = LOOP.journeys
-      .filter((x) => x.collection === j.collection && x.id !== j.id)
-      .slice(0, 3);
+    let related = [];
+    if (dest && destApi) {
+      related = destApi
+        .journeysFor(dest, LOOP.journeys)
+        .filter((x) => x.id !== j.id)
+        .slice(0, 3);
+    }
+    if (!related.length) {
+      related = LOOP.journeys
+        .filter((x) => x.collection === j.collection && x.id !== j.id)
+        .slice(0, 3);
+    }
     $("#related").innerHTML = (related.length ? related : LOOP.journeys.filter((x) => x.collection !== "world").slice(0, 3))
       .map(card)
       .join("");
@@ -989,7 +1423,7 @@
     renderTripFaq(j, col);
 
     if (window.LOOP_SEO && typeof window.LOOP_SEO.applyTrip === "function") {
-      window.LOOP_SEO.applyTrip(j, col);
+      window.LOOP_SEO.applyTrip(j, col, dest);
     }
 
     bindTripNav();
@@ -1673,10 +2107,12 @@
     });
   }
 
+  captureAdParams();
   mountChrome();
   const page = document.body.dataset.page;
   if (page === "home") renderHome();
   if (page === "collection") renderCollection();
+  if (page === "destination") renderDestination();
   if (page === "journeys") renderCatalog();
   if (page === "journey") renderDetail();
   if (page === "book") renderBook();
@@ -1684,4 +2120,5 @@
   if (page === "contact") renderContact();
   if (page === "about") renderAbout();
   if (page === "affiliates") renderAffiliates();
+  if (page === "thank-you") renderThankYou();
 })();

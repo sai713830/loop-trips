@@ -11,3 +11,7 @@ Thumbs.db
 
 # Netlify local cache (if present)
 .netlify
+.env*
+
+# PDF extract scratch
+.tmp_pdf_extract/

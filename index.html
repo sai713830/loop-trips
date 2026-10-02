@@ -27,8 +27,8 @@
       <h1>Your destination. Your pace. Your journey.</h1>
       <p class="lede">From weekend escapes to private international journeys, we design every trip around your dates, budget and travel style.</p>
       <div class="btn-row">
-        <a class="btn btn-light" href="journeys.html">Find your trip</a>
-        <a class="btn btn-ghost" href="concierge.html">Plan with concierge</a>
+        <a class="btn btn-light" href="#enquire">Plan my trip</a>
+        <a class="btn btn-ghost" href="journeys.html">Find your trip</a>
       </div>
       <div class="home-proof" id="home-proof">
         <span>INDIA • INTERNATIONAL • PRIVATE TRIPS</span>
@@ -141,6 +141,66 @@
     </div>
   </section>
 
+  <section class="enquire-band" id="enquire">
+    <div class="wrap enquire-split">
+      <div class="enquire-copy">
+        <p class="eyebrow">Plan a trip</p>
+        <h2>Tell us where you want to go.</h2>
+        <p class="enquire-lede">A short form is enough. Name, WhatsApp, and a destination — the Hyderabad desk replies with a plan and from-price. No payment on this site.</p>
+        <ul class="enquire-points">
+          <li>India from ₹30,000 · the world from ₹1,00,000</li>
+          <li>Reply typically within one business day</li>
+          <li>WhatsApp +91 99511 39299 if you want to talk first</li>
+        </ul>
+      </div>
+      <form id="home-lead-form" class="enquire-form" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="lead-name">Name <span class="req">*</span></label>
+            <input id="lead-name" name="name" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="lead-phone">WhatsApp <span class="req">*</span></label>
+            <input id="lead-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="+91">
+          </div>
+          <div class="field">
+            <label for="lead-email">Email <span class="req">*</span></label>
+            <input id="lead-email" name="email" type="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="lead-when">Travel month</label>
+            <select id="lead-when" name="when">
+              <option value="">Not sure yet</option>
+              <option value="October 2026">October 2026</option>
+              <option value="November 2026">November 2026</option>
+              <option value="December 2026">December 2026</option>
+              <option value="January 2027">January 2027</option>
+              <option value="February 2027">February 2027</option>
+              <option value="March 2027">March 2027</option>
+              <option value="April–June 2027">April–June 2027</option>
+              <option value="Later / flexible">Later / flexible</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label for="lead-destination">Where do you want to go? <span class="req">*</span></label>
+            <input id="lead-destination" name="destination" required placeholder="Ladakh, Bali, Kerala — or not sure yet">
+          </div>
+          <div class="enquire-honeypot" aria-hidden="true">
+            <label for="lead-company">Company</label>
+            <input id="lead-company" name="company" tabindex="-1" autocomplete="off">
+          </div>
+          <div class="field full">
+            <div class="btn-row">
+              <button class="btn btn-fill" type="submit">Send my request</button>
+            </div>
+            <p class="enquire-note">By sending, you agree we may contact you about this trip. See our <a href="privacy.html">privacy policy</a>.</p>
+            <p id="lead-form-error" class="field-error" role="alert"></p>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
   <section class="founder-band" id="founder">
     <div class="wrap founder-split">
       <div class="founder-copy">
@@ -250,6 +310,7 @@
     </div>
   </section>
   <script src="js/data.js"></script>
+  <script src="js/destinations.js"></script>
   <script src="js/content.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="js/concierge.js"></script>

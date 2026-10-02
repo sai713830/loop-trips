@@ -13,9 +13,20 @@ const COLLECTION_PATHS = [
   "/group",
 ];
 
+const DESTINATION_PATHS = [
+  "/places-to-visit-in-goa",
+  "/places-to-visit-in-kerala",
+  "/places-to-visit-in-himachal-pradesh",
+  "/places-to-visit-in-ladakh",
+  "/places-to-visit-in-rajasthan",
+  "/places-to-visit-in-uttarakhand",
+  "/places-to-visit-in-jammu-and-kashmir",
+];
+
 const STATIC_PAGES = [
   { loc: "/", priority: "1.0", changefreq: "weekly" },
   ...COLLECTION_PATHS.map((loc) => ({ loc, priority: "0.85", changefreq: "weekly" })),
+  ...DESTINATION_PATHS.map((loc) => ({ loc, priority: "0.88", changefreq: "weekly" })),
   { loc: "/journeys", priority: "0.9", changefreq: "weekly" },
   { loc: "/about", priority: "0.7", changefreq: "monthly" },
   { loc: "/contact", priority: "0.8", changefreq: "monthly" },

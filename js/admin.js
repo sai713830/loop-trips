@@ -702,6 +702,7 @@
           Check that inbox — including spam — for new trip requests and applications.
         </p>
         <ul style="color:var(--admin-mute);line-height:1.7;margin:0;padding-left:1.2rem">
+          <li><strong>Homepage enquiry</strong> — index.html#enquire (ads / Plan my trip)</li>
           <li><strong>Booking</strong> — book.html (all trips use the same form)</li>
           <li><strong>Contact</strong> — contact.html</li>
           <li><strong>Affiliate</strong> — affiliates.html</li>
